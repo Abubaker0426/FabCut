@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--Auth0-->
+    <string name="auth0_audience">https://test.api.fabtrakr.com</string>
+    <string name="auth0_scheme">xyza</string>
+    <string name="com_auth0_client_id">5gjQWWRYVPEKPP4DlNCZrd9Bw5YQeTBR</string>
+    <string name="com_auth0_domain">fabtrakr-dev.us.auth0.com</string>
+</resources>

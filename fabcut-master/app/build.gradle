@@ -1,0 +1,164 @@
+apply plugin: 'com.android.application'
+apply plugin: 'com.google.firebase.crashlytics'
+apply plugin: 'com.google.gms.google-services'
+apply plugin: 'org.greenrobot.greendao'
+
+//  Load properties from keystore.properties
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+
+//  Creating a new Properties() object
+def keystoreProperties = new Properties()
+
+//  If keystorePropertiesFile exists, read from that, else set from build environment
+if (keystorePropertiesFile.exists()) {
+    //  Loading the keystoreProperties file
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+} else {
+    //  Read all environment variables from the build environment
+    keystoreProperties.setProperty("storeFile", "${System.getenv('STORE_FILE')}")
+    keystoreProperties.setProperty("keyAlias", "${System.getenv('KEY_ALIAS')}")
+    keystoreProperties.setProperty("keyPassword", "${System.getenv('KEY_PASSWORD')}")
+    keystoreProperties.setProperty("storePassword", "${System.getenv('STORE_PASSWORD')}")
+}
+
+android {
+    compileSdkVersion 34
+    buildToolsVersion "33.0.2"
+    defaultConfig {
+        applicationId "com.indiandesigns.fabcut"
+        minSdkVersion 26
+        targetSdkVersion 34
+        versionCode 49
+        versionName "1.0.49"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders = [auth0Domain: "@string/com_auth0_domain", auth0Scheme: "xyza"]
+        vectorDrawables.useSupportLibrary = true
+        multiDexEnabled true
+    }
+    signingConfigs {
+        release {
+            storeFile file(keystoreProperties['storeFile'])
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storePassword keystoreProperties['storePassword']
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    buildTypes {
+        debug {
+            buildConfigField("String", "BASE_URL", "\"https://test.api.fabtrakr.com\"")
+            buildConfigField("String", "API_KEY", "\"\"")
+        }
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField("String", "BASE_URL", "\"https://api.fabtrakr.com\"")
+            buildConfigField("String", "API_KEY", "\"\"")
+            signingConfig signingConfigs.release
+        }
+    }
+
+    buildFeatures {
+        viewBinding = true
+    }
+}
+
+greendao {
+    schemaVersion 10
+}
+
+ext {
+    retrofitVersion = '2.6.0'
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    implementation files('libs/ZSDK_ANDROID_API.jar')
+    implementation 'androidx.test.ext:junit:1.2.1'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test:runner:1.2.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    implementation 'com.google.gms:google-services:4.3.15'
+
+
+    //permission
+    implementation 'pub.devrel:easypermissions:1.2.0'
+
+    //google
+    implementation "com.google.android.gms:play-services-location:17.0.0"
+
+    //support
+    implementation 'com.google.android.material:material:1.2.0-alpha04'
+
+    //Auth0
+    implementation 'com.auth0.android:auth0:1.26.0'
+
+    //injection
+    api 'com.google.dagger:dagger:2.24'
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.24'
+    implementation 'com.jakewharton:butterknife:10.2.0'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:10.2.0'
+
+    //rest
+    implementation 'com.amitshekhar.android:rx2-android-networking:1.0.1'
+
+    //JSON parsing
+    implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
+    implementation 'com.google.code.gson:gson:2.8.6'
+
+    //http logging
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.2.1'
+
+    //rxJava
+    implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.13'
+    implementation "com.squareup.retrofit2:adapter-rxjava:$retrofitVersion"
+
+    //logging
+    implementation 'com.jakewharton.timber:timber:4.7.1'
+
+    //multidex
+    implementation 'com.android.support:multidex:1.0.3'
+
+    //commons
+    implementation 'org.apache.commons:commons-lang3:3.8.1'
+
+    //zing
+    implementation('com.journeyapps:zxing-android-embedded:3.6.0') { transitive = false }
+    implementation "com.google.zxing:core:3.3.0"
+
+    //firebase
+    implementation 'com.google.firebase:firebase-crashlytics:17.2.1'
+    implementation 'com.google.firebase:firebase-analytics:17.5.0'
+
+    //playcore
+    implementation 'com.google.android.play:core:1.8.0'
+
+    //swipe
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+
+    //db
+    implementation 'org.greenrobot:greendao:3.3.0'
+
+    //pdf
+    implementation 'com.itextpdf:itextg:5.5.10'
+    implementation 'com.aventrix.jnanoid:jnanoid:2.0.0'
+
+    //time
+    implementation 'joda-time:joda-time:2.10.9'
+
+    //sheet
+    implementation 'biz.laenger.android:vpbs:0.0.6'
+
+    //jsoup
+    implementation 'org.jsoup:jsoup:1.13.1'
+
+    // https://mvnrepository.com/artifact/org.apache.commons/commons-text
+    implementation group: 'org.apache.commons', name: 'commons-text', version: '1.9'
+}

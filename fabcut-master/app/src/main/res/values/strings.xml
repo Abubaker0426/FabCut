@@ -1,0 +1,138 @@
+<resources>
+    <string name="app_name">FabCut</string>
+
+    <!--play store-->
+    <string name="app_google_play_store_link">"https://play.google.com/store/apps/details?id="</string>
+    <string name="app_market_link">"market://details?id="</string>
+
+    <!--ui-->
+    <string name="dialog_ok">Ok</string>
+    <string name="dialog_cancel">Cancel</string>
+    <string name="location_error">Could not get access to location</string>
+    <string name="unregister">Unregister</string>
+    <string name="register">Register</string>
+    <string name="leader">Leader</string>
+    <string name="follower">Follower</string>
+
+    <!--App Message-->
+    <string name="api_retry_error">Please retry!</string>
+    <string name="api_default_error">Something wrong happened!</string>
+    <string name="some_error">Some Error Occurred!</string>
+    <string name="connection_error">Internet connection lost!</string>
+
+    <!--Auth0-->
+    <string name="auth0_audience">https://api.fabtrakr.com</string>
+    <string name="auth0_scheme">xyza</string>
+    <string name="com_auth0_client_id">xizdjMZg1yHY17ftD0ru263n3fmCwKhb</string>
+    <string name="com_auth0_domain">dev-q9u-izlr.auth0.com</string>
+    <string name="pick_location">Please pick a location</string>
+    <string name="submit">Submit</string>
+    <string name="select_item_error">Select item to continue</string>
+    <string name="enter_oc_number_error">Enter OC number</string>
+    <string name="hint_oc_number">Enter OC Number</string>
+    <string name="select_job">Select a job to assign it to a follower</string>
+    <string name="total">Total</string>
+    <string name="assigned_quantity">Assigned Quantity</string>
+    <string name="cut_quantity">Cut Quantity</string>
+    <string name="lay_length">Lay Length</string>
+    <string name="scan_barcode">Scan Barcode</string>
+    <string name="expected_plies">Expected Plies</string>
+    <string name="actual_plies">Actual Plies</string>
+    <string name="lay_number">Lay Number</string>
+    <string name="followers">Followers</string>
+    <string name="show_followers">Show Followers</string>
+    <string name="confirm_delete_job">Are you sure you want to delete job assigned to this follower?</string>
+    <string name="no_job_assigned">No job assigned to follower</string>
+    <string name="actual_plies_error">Please enter a valid value for actual plies</string>
+    <string name="confirm_submit_job">Are you sure you want to complete this job?</string>
+    <string name="confirm_assigned_quantity_more">The cut quantity is less than the assigned quantity. Still complete the job?</string>
+    <string name="lay_length_error">Please enter a valid value for lay length</string>
+    <string name="quantity_error">Please enter a valid quantity</string>
+    <string name="refresh">Refresh</string>
+    <string name="dialog_dismiss">Dismiss</string>
+    <string name="job_assigned">Job assigned successfully</string>
+    <string name="select_a_job">Please select a job</string>
+    <string name="job_deleted">Job deleted successfully</string>
+    <string name="end_bit_job_deleted">End bit job deleted successfully</string>
+    <string name="number_of_plies">Number Of Plies</string>
+    <string name="job_completed">Job completed successfully</string>
+    <string name="end_bit_job_completed">End bit job completed successfully</string>
+    <string name="update_download_failed">Update download failed</string>
+    <string name="table_number">Table Number</string>
+    <string name="table_number_error">Please enter a valid Table Number</string>
+    <string name="select_marker_error">Select a marker</string>
+    <string name="fetch_markers_error">There was a problem fetching the markers. Please try again</string>
+    <string name="validate_oc_number_error">There was a problem validating the OC Number. Please try again</string>
+    <string name="fetch_job_details_error">Sorry, could not fetch the job details</string>
+    <string name="fetch_followers_error">Sorry, could not fetch followers</string>
+    <string name="job_assign_error">Sorry, could not assign the job to follower</string>
+    <string name="delete_job_error">There was a problem deleting this job. Please try again</string>
+    <string name="fetch_barcode_data_error">Sorry, could not fetch the barcode details</string>
+    <string name="delete_barcode_error">Sorry, could not delete the barcode from this job</string>
+    <string name="complete_job_error">There was a problem completing this job. Please try again</string>
+    <string name="validate_plies_error">Sorry, could not validate plies</string>
+    <string name="validate_location_error">Sorry, could not validate your location</string>
+    <string name="register_error">There was a problem registering this device. Please try again</string>
+    <string name="unregister_error">There was a problem unregistering this device. Please try again</string>
+    <string name="validate_device_error">There was a problem validating your device. Please try again</string>
+    <string name="auth_error">Authentication failed</string>
+    <string name="ratio_error">Please enter valid ratios</string>
+    <string name="go_back">Go Back</string>
+    <string name="stickers">Stickers</string>
+    <string name="jobs_assigned">Jobs Assigned</string>
+    <string name="oc">Oc</string>
+    <string name="lay">Lay</string>
+    <string name="print">Print</string>
+    <string name="tab">\u0009\u0009\u0009\u0009</string>
+    <string name="generating_stickers">Generating stickers for OC - LAY</string>
+    <string name="quantity">Quantity</string>
+    <string name="size">Size</string>
+    <string name="fetch_job_assigned_error">Sorry, could not fetch assigned jobs</string>
+    <string name="save_parts_errors">There was a problem saving parts information</string>
+    <string name="fetch_parts_error">Sorry, could not fetch parts details</string>
+    <string name="fetch_database_error">Sorry, could not fetch details from database</string>
+    <string name="no_parts_error">No parts found for selected OC</string>
+    <string name="invalid">Invalid</string>
+    <string name="zero_quantity_ratio_error">All quantities or ratios must not be zero</string>
+    <string name="select_fir_error">Select a Fit Type</string>
+    <string name="marker_oc_number">Oc Number:</string>
+    <string name="marker_item_code">Item Code:</string>
+    <string name="marker_item_description">Item Description:</string>
+    <string name="marker_shrinkage">Shrinkage</string>
+    <string name="select_marker">Select a marker</string>
+    <string name="cut_quantity_error">Cut quantity should be greater than zero</string>
+    <string name="cut_quantity_validation_error">Cut quantity cannot be greater than assign quantity</string>
+    <string name="add">Add</string>
+    <string name="bundle_quantity_hint_text">Enter quantity</string>
+    <string name="bundle_input_blank_validation_error">Quantity or country cannot be blank or zero</string>
+    <string name="bundle_allowed_quantity_mismatch_error">Allowed quantity should match bundle quantity</string>
+    <string name="Bundling">Split Bundle</string>
+    <string name="fetch_country_error">Sorry, could not fetch countries</string>
+    <string name="fetch_parts">Get parts for OC</string>
+    <string name="put_bundle_parts_error">Sorry, could not update parts details</string>
+    <string name="bundle_parts_validate_error">Enter OC number and select least one part to submit</string>
+    <string name="edit_bundle_parts_validate_error">Select parts to print from second bundle onwards</string>
+    <string name="jobAssign_confirm_dialog_message">Are you sure you want remove this item</string>
+    <string name="job_item_quantity_error">Required least one item quantity row</string>
+    <string name="item_shade_error">Please enter a value for shade</string>
+    <string name="item_shrinkage_error">Please enter a valid value for shrinkage %</string>
+    <string name="item_pattern_error">Please enter a valid value for pattern %</string>
+
+
+    <string-array name="reason_options">
+        <item>Reason</item>
+        <item>Excess</item>
+        <item>Shortage</item>
+    </string-array>
+    <string name="update_prompt">Update to the latest version to continue using the app</string>
+    <string name="select_lay">Select valid lay number</string>
+    <string name="no_lays_error">No lays found</string>
+    <string name="fetch_lay_error">Sorry, could not fetch lay numbers</string>
+    <string name="select_parts">Select parts</string>
+
+    <!-- Zebra printer error  -->
+    <string name="zebra_printer_connection_denied">No permission to communicate with the Zebra printer</string>
+
+    <!-- Over flow menu variables  -->
+    <string name="menu_select_parts">Select Bundle Parts</string>
+</resources>
