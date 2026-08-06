@@ -62,6 +62,15 @@ export const MOCK_ASSIGNED_JOBS: OcLay[] = [
     itemDescription: 'Men Trouser - Black / IC-003',
     details: [],
   },
+  {
+    jobId: 'J2',
+    tableNum: 5,
+    ocNo: 'OC2024002',
+    lay: 1,
+    fitType: 'Slim',
+    itemDescription: 'Men Trouser - Black / IC-003',
+    details: [],
+  },
 ];
 
 export const MOCK_LAY_NUMBERS: string[] = ['1', '2', '3', '4'];
