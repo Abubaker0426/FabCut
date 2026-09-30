@@ -11,7 +11,7 @@
  */
 import { Pressable, Text, View } from 'react-native';
 
-import type { OcLay } from '@/types';
+import type { JobListRowProps } from '@/types/JobListRow';
 
 // ── Header row ────────────────────────────────────────────────────────────────
 
@@ -43,11 +43,6 @@ function ColHeader({ label }: { label: string }) {
 }
 
 // ── Data row ──────────────────────────────────────────────────────────────────
-
-interface JobListRowProps {
-  job: OcLay;
-  onBundlePress?: () => void;
-}
 
 export function JobListRow({ job, onBundlePress }: JobListRowProps) {
   return (

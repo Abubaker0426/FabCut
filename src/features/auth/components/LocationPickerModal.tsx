@@ -1,19 +1,5 @@
-/**
- * LocationPickerModal — mirrors dialog_location_picker.xml
- * Shown when GPS returns multiple valid factory locations.
- * User picks one, then registration continues.
- */
-import React from 'react';
-import { FlatList, Modal, Pressable, Text, View, } from 'react-native';
-import type { Location } from '@/types';
-
-interface LocationPickerModalProps {
-  visible: boolean;
-  locations: Location[];
-  onSelect: (location: Location) => void;
-  /** Pass an empty function to make the modal non-dismissable */
-  onDismiss: () => void;
-}
+import { FlatList, Modal, Pressable, Text, View } from 'react-native';
+import type { LocationPickerModalProps } from '@/types/LocationPickerModal';
 
 export function LocationPickerModal({ visible, locations, onSelect, onDismiss, }: LocationPickerModalProps) {
   return (
@@ -37,7 +23,7 @@ export function LocationPickerModal({ visible, locations, onSelect, onDismiss, }
             {/* Location list */}
             <FlatList
               data={locations}
-              keyExtractor={(item) => item.locationId}
+              keyExtractor={(item, index) => `${item}-${index}`}
               style={{ maxHeight: 320 }}
               renderItem={({ item }) => (
                 <Pressable
@@ -46,7 +32,7 @@ export function LocationPickerModal({ visible, locations, onSelect, onDismiss, }
                 >
                   <View className="flex-1">
                     <Text className="text-lg font-semibold text-gray-800 pl-2">
-                      {item.locationName}
+                      {item}
                     </Text>
                   </View>
                 </Pressable>

@@ -1,146 +1,228 @@
-/**
- * MainScreen — Device Registration / Login
- * Mirrors: MainActivity + activity_main.xml
- *
- * Flow:
- *  1. App opens → immediately get GPS → validate location against server
- *  2. If multiple locations returned → show LocationPickerModal (BEFORE anything else)
- *  3. User picks location → location is stored
- *  4. Check if device is already registered
- *     - YES → show Unregister button
- *     - NO  → show Register card (role picker + table number)
- */
 import React, { useEffect, useState } from 'react';
-import {
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  Text,
-  View,
-} from 'react-native';
+import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View, } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-
+import { getDeviceId } from '@/lib/deviceId';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { LoadingOverlay } from '@/components/ui/LoadingOverlay';
 import { useAppStore } from '@/store/appStore';
-import type { Location, Role } from '@/types';
+import type { Role } from '@/types/common';
 import { LocationPickerModal } from '../components/LocationPickerModal';
+import { useGpsCoords } from '../hooks/useGpsCoords';
+import { useLocations } from '../hooks/useLocations';
+import { useCheckDeviceRegistration } from '../hooks/useCheckDeviceRegistration';
+import { useRegisterDevice } from '../hooks/useRegisterDevice';
+import { useUnregisterDevice } from '../hooks/useUnregisterDevice';
+import { toast } from '@/lib/toast';
 
 type Screen = 'loading' | 'location' | 'register' | 'unregister';
 
-// ─── Mock locations — replace with real GPS + API call ────────────────────────
-const MOCK_LOCATIONS: Location[] = [
-  { locationId: 'L1', locationName: 'IDPL1'},
-  { locationId: 'L2', locationName: 'IDPL2'},
-  { locationId: 'L3', locationName: 'IDPL3'},
-];
 
 export default function MainScreen() {
   const router = useRouter();
-  const [screen, setScreen]                       = useState<Screen>('loading');
-  const [role, setRole]                           = useState<Role>('LEADER');
-  const [tableNumber, setTableNumber]             = useState('');
-  const [loading, setLoading]                     = useState(false);
+  const storeRole = useAppStore((s) => s.role);
+  const storeLocation = useAppStore((s) => s.location);
+  // UI state
+  const [screen, setScreen] = useState<Screen>('loading');
+  const [role, setRole] = useState<Role>('LEADER');
+  const [tableNumber, setTableNumber] = useState('');
   const [locationModalVisible, setLocationModalVisible] = useState(false);
-  const [locations, setLocations]                 = useState<Location[]>([]);
-  const [selectedLocation, setSelectedLocation]   = useState<Location | null>(null);
+  const [locations, setLocations] = useState<string[]>([]);
+  const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
 
-  // ── On mount: GPS → validate → show location picker if needed ──────────────
+  // Device ID — mirrors Java CommonUtils.getDeviceId()
+  // Loaded async on mount via expo-application (Application.getAndroidId / getIosIdForVendorAsync)
+  const [deviceId, setDeviceId] = useState<string>('');
+
   useEffect(() => {
-    (async () => {
-      setLoading(true);
-      // TODO: replace with real expo-location + API call
-      //   1. const coords = await Location.getCurrentPositionAsync()
-      //   2. const locs   = await api.get(`/service/validate/locations?lat=...&lng=...`)
-      await new Promise((r) => setTimeout(r, 800)); // simulate network
-
-      const fetchedLocations = MOCK_LOCATIONS;
-      setLoading(false);
-
-      if (fetchedLocations.length === 1) {
-        // Only one location — select it automatically
-        handleLocationSelected(fetchedLocations[0]);
-      } else {
-        // Multiple locations → show picker
-        setLocations(fetchedLocations);
-        setLocationModalVisible(true);
-        setScreen('location');
-      }
-    })();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    getDeviceId().then((id) => setDeviceId(id));
   }, []);
 
-  const handleLocationSelected = (location: Location) => {
-    setSelectedLocation(location);
-    setLocationModalVisible(false);
+  // ── Hook: GPS ──────────────────────────────────────────────────────────────
+  const gps = useGpsCoords();
+  const coords = gps.status === 'granted' ? gps.coords : null;
 
-    // TODO: check if device is already registered
-    //   GET /fabcut/cutting/registrations/{deviceId}
-    //   → devRegStatus true  → setScreen('unregister')
-    //   → devRegStatus false → setScreen('register')
-    setScreen('register'); // default to register for now
+  // ── Hook: Validate location via API ───────────────────────────────────────
+  const { data: fetchedLocations, isLoading: isLocationsLoading, error: locationsError } =
+    useLocations(coords);
+
+  // ── Hook: Check device registration ───────────────────────────────────────
+  const {
+    data: deviceRegData,
+    isLoading: isDevRegLoading,
+    error: deviceRegError,
+  } = useCheckDeviceRegistration(deviceId, selectedLocation);
+
+  // ── Hook: Register device ──────────────────────────────────────────────────
+  const { mutate: register, isPending: isRegistering } = useRegisterDevice();
+
+  // ── Hook: Unregister device ────────────────────────────────────────────────
+  const { mutate: unregister, isPending: isUnregistering } = useUnregisterDevice();
+
+  // ── Effect: GPS permission denied ─────────────────────────────────────────
+  useEffect(() => {
+    if (gps.status === 'denied') {
+      toast.error('Location permission is required to use FabCut.', 'Permission Denied');
+    }
+    if (gps.status === 'error') {
+      toast.error(gps.message, 'Location Error');
+    }
+  }, [gps.status]);
+
+  // ── Effect: Location API response ─────────────────────────────────────────
+  useEffect(() => {
+    if (!fetchedLocations) return;
+
+    if (fetchedLocations.length === 1) {
+      // Single location — auto-select, same as Java
+      handleLocationSelected(fetchedLocations[0]);
+    } else if (fetchedLocations.length > 1) {
+      // Multiple locations — show picker
+      setLocations(fetchedLocations);
+      setLocationModalVisible(true);
+      setScreen('location');
+    } else {
+      toast.info('No valid locations found nearby.');
+    }
+  }, [fetchedLocations]);
+
+  useEffect(() => {
+    if (locationsError) {
+      toast.error('Failed to validate location. Check your network connection.', 'Network Error');
+    }
+  }, [locationsError]);
+
+  // ── Effect: Device registration check response ─────────────────────────────
+  useEffect(() => {
+    if (!deviceRegData) return;
+
+    const { devRegStatus, role: savedRole } = deviceRegData;
+    if (devRegStatus) {
+      // Device is already registered — store role, show unregister screen,
+      // then navigate to the appropriate screen (same as Java's showUnRegisterButton + showUiBasedOnRole)
+      useAppStore.getState().setRole(savedRole as Role);
+      setScreen('unregister');
+      router.replace(savedRole?.toLowerCase() === 'leader' ? '/leader' : '/follower');
+    } else {
+      // Not registered — show the register form (mirrors Java's showRegisterButton)
+      setScreen('register');
+    }
+  }, [deviceRegData]);
+
+  useEffect(() => {
+    if (deviceRegError) {
+      toast.error('Failed to check device registration.', 'Registration Error');
+    }
+  }, [deviceRegError]);
+
+  // ── Handlers (no API logic — just call hooks) ──────────────────────────────
+
+  const handleLocationSelected = (location: string) => {
+    setSelectedLocation(location);
+    useAppStore.getState().setLocation(location);
+    setLocationModalVisible(false);
+    // useCheckDeviceRegistration fires automatically via enabled: !!selectedLocation
   };
 
   const handleRegister = () => {
     if (role === 'FOLLOWER') {
       const num = parseInt(tableNumber, 10);
       if (!tableNumber || isNaN(num) || num < 1 || num > 10) {
-        alert('Table number must be between 1 and 10');
+        toast.error('Table number must be between 1 and 10', 'Invalid Input');
         return;
       }
     }
-    setLoading(true);
-    // TODO: POST /fabcut/cutting/registrations/{deviceId}
-    //   body: { role, tableNumber, location: selectedLocation.locationId }
-    //   on success → navigate to /leader or /follower
-    setTimeout(() => {
-      setLoading(false);
-      // Save to store
-      useAppStore.getState().setRole(role);
-      if (role === 'FOLLOWER') {
-        useAppStore.getState().setTableNumber(parseInt(tableNumber, 10));
-      }
-      useAppStore.getState().setRegistered(true);
-      // Navigate
-      if (role === 'LEADER') {
-        router.replace('/leader');
-      } else {
-        router.replace('/follower');
-      }
-    }, 1000);
+
+    const location = useAppStore.getState().location ?? '';
+
+    register(
+      {
+        deviceId,
+        data: {
+          location,
+          role,
+          tableNumber: role === 'FOLLOWER' ? parseInt(tableNumber, 10) : 0,
+        },
+      },
+      {
+        onSuccess: () => {
+          useAppStore.getState().setRole(role);
+          useAppStore.getState().setRegistered(true);
+          if (role === 'FOLLOWER') {
+            useAppStore.getState().setTableNumber(parseInt(tableNumber, 10));
+          }
+          // Mirrors Java: showUnRegisterButton() + hideRegisterButton() + showUiBasedOnRole()
+          // Show unregister screen first, then navigate
+          setScreen('unregister');
+          router.replace(role === 'LEADER' ? '/leader' : '/follower');
+        },
+        onError: (e: any) => {
+          toast.apiError(e, 'Registration Failed');
+        },
+      },
+    );
   };
 
   const handleUnregister = () => {
-    setLoading(true);
-    // TODO: DELETE /fabcut/cutting/registrations/{deviceId}
-    //   on success → reset state, setScreen('register')
-    setTimeout(() => {
-      useAppStore.getState().reset();
-      setLoading(false);
-      setScreen('register');
-    }, 1200);
+    const location = useAppStore.getState().location ?? '';
+    const currentRole = useAppStore.getState().role ?? role;
+
+    unregister(
+      { deviceId, data: { location, role: currentRole } },
+      {
+        onSuccess: () => {
+          useAppStore.getState().reset();
+          setScreen('register');
+        },
+        onError: (e: any) => {
+          toast.apiError(e, 'Unregister Failed');
+        },
+      },
+    );
   };
+
+  // ── Derived loading state ──────────────────────────────────────────────────
+  const isLoading =
+    gps.status === 'loading' ||
+    isLocationsLoading ||
+    isDevRegLoading ||
+    isRegistering ||
+    isUnregistering;
+
+  const loadingMessage =
+    gps.status === 'loading' ? 'Getting location...' :
+      isLocationsLoading ? 'Detecting location...' :
+        isDevRegLoading ? 'Checking device...' :
+          isRegistering ? 'Registering...' :
+            isUnregistering ? 'Unregistering...' :
+              'Please wait...';
+
+  // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
     <SafeAreaView className="flex-1 bg-lightBlue">
-      <LoadingOverlay visible={loading} message="Please wait..." />
 
-      {/* Location picker — shown immediately on app open if multiple locations */}
+      {/* Location picker — shown immediately if multiple locations returned */}
       <LocationPickerModal
         visible={locationModalVisible}
         locations={locations}
         onSelect={handleLocationSelected}
         onDismiss={() => {
           // Don't allow dismissing without picking — same as Java behaviour
-          // (user MUST pick a location to proceed)
         }}
       />
 
-      {/* Only render form content once a location has been resolved */}
-      {(screen === 'register' || screen === 'unregister') && (
+      {/* Loading state */}
+      {isLoading && (
+        <View className="flex-1 items-center justify-center">
+          <Text className="text-4xl font-bold text-primary tracking-widest mb-4">FabCut</Text>
+          <ActivityIndicator size="large" color="#208AEF" />
+          <Text className="text-sm text-primary/70 mt-3">{loadingMessage}</Text>
+        </View>
+      )}
+
+      {/* Form — only shown once a location has been selected and not loading */}
+      {!isLoading && (screen === 'register' || screen === 'unregister') && (
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           className="flex-1"
@@ -157,9 +239,9 @@ export default function MainScreen() {
             {/* Selected location badge */}
             {selectedLocation && (
               <View className="items-center mb-4">
-                <View className="flex-row items-center bg-primary/10 rounded-full px-4 py-1.5 gap-1">
+                <View className="flex-row items-center bg-primary/10 rounded-full px-4 py-1.5">
                   <Text className="text-xs text-primary font-semibold">
-                    📍 {selectedLocation.locationName}
+                    📍 {selectedLocation}
                   </Text>
                 </View>
               </View>
@@ -179,19 +261,15 @@ export default function MainScreen() {
                   onRegister={handleRegister}
                 />
               ) : (
-                <UnregisterView onUnregister={handleUnregister} />
+                <UnregisterView
+                  onUnregister={handleUnregister}
+                  role={storeRole}
+                  location={storeLocation}
+                />
               )}
             </View>
           </ScrollView>
         </KeyboardAvoidingView>
-      )}
-
-      {/* Blank state while location is loading / being picked */}
-      {screen === 'loading' && !loading && (
-        <View className="flex-1 items-center justify-center">
-          <Text className="text-4xl font-bold text-primary tracking-widest">FabCut</Text>
-          <Text className="text-sm text-primary/70 mt-2">Detecting location...</Text>
-        </View>
       )}
     </SafeAreaView>
   );
@@ -212,14 +290,14 @@ function RegisterForm({ role, setRole, tableNumber, setTableNumber, onRegister }
     <>
       <Text className="text-base font-semibold text-gray-700 mb-3">Select Role</Text>
       <View className="flex-row mb-5 gap-3">
-        <RoleChip label="Leader"   active={role === 'LEADER'}   onPress={() => setRole('LEADER')} />
+        <RoleChip label="Leader" active={role === 'LEADER'} onPress={() => setRole('LEADER')} />
         <RoleChip label="Follower" active={role === 'FOLLOWER'} onPress={() => setRole('FOLLOWER')} />
       </View>
 
       {role === 'FOLLOWER' && (
         <Input
           label="Table Number"
-          placeholder="Enter table number"
+          placeholder="Enter table number (1–10)"
           keyboardType="number-pad"
           value={tableNumber}
           onChangeText={setTableNumber}
@@ -238,9 +316,8 @@ function RoleChip({ label, active, onPress }: { label: string; active: boolean; 
   return (
     <Pressable
       onPress={onPress}
-      className={`flex-1 py-3 rounded-lg border items-center ${
-        active ? 'bg-primary border-primary' : 'border-gray-300 bg-white'
-      }`}
+      className={`flex-1 py-3 rounded-lg border items-center ${active ? 'bg-primary border-primary' : 'border-gray-300 bg-white'
+        }`}
     >
       <Text className={`font-semibold text-sm ${active ? 'text-white' : 'text-gray-600'}`}>
         {label}
@@ -250,14 +327,46 @@ function RoleChip({ label, active, onPress }: { label: string; active: boolean; 
 }
 
 // ─── Unregister View ──────────────────────────────────────────────────────────
+// Mirrors Java: activity_main.xml unregister button (visibility="gone" → visible)
+// Shows when devRegStatus = true or after a successful register.
+// User can tap to unregister → back to RegisterForm.
 
-function UnregisterView({ onUnregister }: { onUnregister: () => void }) {
+interface UnregisterViewProps {
+  onUnregister: () => void;
+  role: Role | null;
+  location: string | null;
+}
+
+function UnregisterView({ onUnregister, role, location }: UnregisterViewProps) {
   return (
     <View className="items-center gap-4">
-      <Text className="text-base text-gray-600 text-center">
-        This device is already registered.
+      {/* Registered info */}
+      <View className="w-full bg-primary/5 rounded-lg p-4 gap-2">
+        <Text className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+          Registered As
+        </Text>
+        <View className="flex-row items-center justify-between">
+          <Text className="text-base font-bold text-primary capitalize">
+            {role ? role.charAt(0) + role.slice(1).toLowerCase() : '—'}
+          </Text>
+          {location && (
+            <View className="flex-row items-center bg-primary/10 rounded-full px-3 py-1">
+              <Text className="text-xs text-primary font-semibold">📍 {location}</Text>
+            </View>
+          )}
+        </View>
+      </View>
+
+      <Text className="text-sm text-gray-500 text-center">
+        This device is already registered. Unregister to change role or location.
       </Text>
-      <Button title="Unregister Device" variant="danger" onPress={onUnregister} className="w-full" />
+
+      <Button
+        title="Unregister Device"
+        variant="danger"
+        onPress={onUnregister}
+        className="w-full mt-1"
+      />
     </View>
   );
 }

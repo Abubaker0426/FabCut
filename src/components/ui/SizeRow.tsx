@@ -1,7 +1,3 @@
-/**
- * Renders two horizontal rows: sizes on top, quantities below.
- * Mirrors the dynamic LinearLayout rows in the Java layouts.
- */
 import React from 'react';
 import { ScrollView, Text, View } from 'react-native';
 
@@ -20,8 +16,8 @@ export function SizeRow({ sizes, quantities, secondQuantities }: SizeRowProps) {
         <View>
           {/* Size row */}
           <View className="flex-row">
-            {sizes.map((s) => (
-              <View key={s} className="w-14 items-center py-1">
+            {sizes.map((s, i) => (
+              <View key={i} className="w-14 items-center py-1">
                 <Text className="text-xs font-bold text-primary uppercase">{s}</Text>
               </View>
             ))}

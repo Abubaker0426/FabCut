@@ -1,52 +1,10 @@
-/**
- * CustomHeader
- *
- * Single reusable toolbar used across all screens.
- * Mirrors MaterialToolbar from the Java codebase.
- *
- * Variants:
- *  - Root screen (no back):  title + right actions + optional overflow menu + optional logout
- *  - Child screen (back):    back arrow + title + right actions
- *  - Badge:                  optional pill label before right actions
- *
- * overflowMenu — mirrors Android's 3-dot overflow menu.
- *   Pass an array of { label, onPress } items to show the ⋮ button.
- */
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { Modal, Pressable, Text, TouchableOpacity, View } from 'react-native';
+import {  CustomHeaderProps} from '@/types/customHeader'
 
-type IoniconName = React.ComponentProps<typeof Ionicons>['name'];
-
-interface RightAction {
-  icon: IoniconName;
-  onPress: () => void;
-  label?: string;
-}
-
-interface OverflowItem {
-  label: string;
-  onPress: () => void;
-}
-
-interface CustomHeaderProps {
-  title: string;
-  onBack?: () => void;
-  onLogout?: () => void;
-  badge?: string;
-  rightActions?: RightAction[];
-  /** 3-dot overflow menu items */
-  overflowMenu?: OverflowItem[];
-}
-
-export default function CustomHeader({
-  title,
-  onBack,
-  onLogout,
-  badge,
-  rightActions = [],
-  overflowMenu = [],
-}: CustomHeaderProps) {
+export default function CustomHeader({ title, onBack, onLogout, badge,
+  rightActions = [], overflowMenu = [], }: CustomHeaderProps) {
   const [menuVisible, setMenuVisible] = useState(false);
 
   return (

@@ -1,67 +1,28 @@
-/**
- * BarcodeRow
- *
- * One row in the barcode list on the follower's job screen.
- * Mirrors follower_job_row_item.xml exactly.
- *
- * Layout:
- *  ┌──────────────────────────────────────────────┐
- *  │  BC-00001  (barcode — bold)                  │
- *  │                                              │
- *  │  Expected Plies    │  Actual Plies  [ icon ] │
- *  │  24                │  [  input   ]           │
- *  │                                              │
- *  │  [ Reason dropdown ─────────── ]  [ delete ] │
- *  └──────────────────────────────────────────────┘
- *
- * Validation states (feedback icon):
- *   idle       → nothing shown
- *   validating → ActivityIndicator spinner
- *   valid      → green checkmark  (ic_check)
- *   error      → red X            (ic_error)
- */
-import { Ionicons } from '@expo/vector-icons';
-import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native';
-import { useState } from 'react';
+import { Ionicons } from '@expo/vector-icons'
+import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native'
+import { useState } from 'react'
+import CustomDropdown from '@/components/Common/CustomDropdown'
+import type { BarcodeRowProps, ValidationState } from '@/types/BarcodeRow'
 
-import CustomDropdown from '@/components/Common/CustomDropdown';
-import type { ScanBarcode } from '@/types';
-
-// Mirrors @array/reason_options in strings.xml
-const REASON_OPTIONS = ['Reason', 'Excess', 'Shortage'];
-
-export type ValidationState = 'idle' | 'validating' | 'valid' | 'error';
-
-interface BarcodeRowProps {
-  item: ScanBarcode;
-  validationState?: ValidationState;
-  onActualPliesChange: (barcode: string, value: string) => void;
-  /** Called when the actual plies input loses focus — triggers validate API */
-  onValidate?: (barcode: string, actualPlies: number) => void;
-  onDelete?: (barcode: string) => void;
-  onReasonChange?: (barcode: string, reason: string) => void;
-}
+const REASON_OPTIONS = ['Reason', 'Excess', 'Shortage']
 
 export function BarcodeRow({
-  item,
-  validationState = item.validated ? 'valid' : 'idle',
-  onActualPliesChange,
-  onValidate,
-  onDelete,
-  onReasonChange,
+  item, validationState = item.validated ? 'valid' : 'idle',
+  onActualPliesChange, onValidate, onDelete, onReasonChange,
 }: BarcodeRowProps) {
-  const [reason, setReason] = useState('Reason');
+
+  const [reason, setReason] = useState('Reason')
 
   const handleReasonSelect = (selected: string) => {
-    setReason(selected);
-    onReasonChange?.(item.barcode, selected);
-  };
+    setReason(selected)
+    onReasonChange?.(item.barcode, selected)
+  }
 
   const handlePliesBlur = () => {
     if (item.actualPlies > 0) {
-      onValidate?.(item.barcode, item.actualPlies);
+      onValidate?.(item.barcode, item.actualPlies)
     }
-  };
+  }
 
   return (
     <View
@@ -155,5 +116,5 @@ export function BarcodeRow({
 
       </View>
     </View>
-  );
+  )
 }

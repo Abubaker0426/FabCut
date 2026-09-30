@@ -4,44 +4,28 @@
  * Leader splits a bundle across countries.
  * Each row = quantity + country picker.
  * Validates total === totalQuantity before submit.
+ * On submit → print barcodes via Zebra (ZPL) or PDF fallback.
  */
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 import {
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  View,
+  ActivityIndicator, KeyboardAvoidingView, Modal, Platform, Pressable,
+  ScrollView, Text, TextInput, View,
 } from 'react-native';
-
 import { Button } from '@/components/ui/Button';
-import type { BundleDetail } from '@/types';
+import { printBarcodes } from '@/lib/printManager';
+import { toast } from '@/lib/toast';
+import type { BundleDetail } from '@/types/leader';
+import type { BundleRowProps, EditBundleModalProps } from '@/types/EditBundleModal';
+import type { PrintJob } from '@/types/print';
 import { MOCK_COUNTRIES } from '../constants/leaderMockData';
 
-interface EditBundleModalProps {
-  visible: boolean;
-  ocNumber: string;
-  jobId: string;
-  totalQuantity: number;
-  onDismiss: () => void;
-  onSubmit: (rows: BundleDetail[]) => void;
-}
-
-export function EditBundleModal({
-  visible,
-  ocNumber,
-  totalQuantity,
-  onDismiss,
-  onSubmit,
-}: EditBundleModalProps) {
+export function EditBundleModal({ visible, ocNumber, jobId, totalQuantity, onDismiss, onSubmit, printJob }: EditBundleModalProps) {
   const [rows, setRows] = useState<BundleDetail[]>([
     { quantity: 0, country: MOCK_COUNTRIES[0] },
   ]);
   const [error, setError] = useState('');
+  const [printing, setPrinting] = useState(false);
 
   useEffect(() => {
     if (visible) {
@@ -63,13 +47,28 @@ export function EditBundleModal({
 
   const currentTotal = rows.reduce((s, r) => s + (Number(r.quantity) || 0), 0);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (currentTotal !== totalQuantity) {
       setError(`Total must equal ${totalQuantity}. Current: ${currentTotal}`);
       return;
     }
     setError('');
-    // TODO: fetch parts → generate ZPL → print via Zebra
+
+    if (printJob) {
+      setPrinting(true);
+      // Try Zebra first — fall back to PDF if no printer found
+      let result = await printBarcodes(printJob, 'zebra');
+      if (!result.success) {
+        result = await printBarcodes(printJob, 'pdf');
+      }
+      setPrinting(false);
+
+      if (!result.success) {
+        toast.error(result.error ?? 'Unknown error', 'Print Failed');
+        return;
+      }
+    }
+
     onSubmit(rows);
   };
 
@@ -126,15 +125,13 @@ export function EditBundleModal({
 
                 {/* Running total */}
                 <View
-                  className={`flex-row justify-between rounded-lg px-4 py-2 mb-3 ${
-                    currentTotal === totalQuantity ? 'bg-green-50' : 'bg-amber-50'
-                  }`}
+                  className={`flex-row justify-between rounded-lg px-4 py-2 mb-3 ${currentTotal === totalQuantity ? 'bg-green-50' : 'bg-amber-50'
+                    }`}
                 >
                   <Text className="text-sm text-gray-600">Current total</Text>
                   <Text
-                    className={`text-sm font-bold ${
-                      currentTotal === totalQuantity ? 'text-green-700' : 'text-amber-700'
-                    }`}
+                    className={`text-sm font-bold ${currentTotal === totalQuantity ? 'text-green-700' : 'text-amber-700'
+                      }`}
                   >
                     {currentTotal} / {totalQuantity}
                   </Text>
@@ -142,7 +139,14 @@ export function EditBundleModal({
 
                 {error ? <Text className="text-red-500 text-xs mb-3">{error}</Text> : null}
 
-                <Button title="Submit & Print" onPress={handleSubmit} />
+                {printing ? (
+                  <View className="items-center py-3">
+                    <ActivityIndicator color="#21226b" />
+                    <Text className="text-xs text-gray-500 mt-2">Printing labels…</Text>
+                  </View>
+                ) : (
+                  <Button title="Submit & Print" onPress={handleSubmit} />
+                )}
               </ScrollView>
             </View>
           </Pressable>
@@ -153,14 +157,6 @@ export function EditBundleModal({
 }
 
 // ── Bundle row ────────────────────────────────────────────────────────────────
-
-interface BundleRowProps {
-  row: BundleDetail;
-  countries: string[];
-  onQuantityChange: (v: string) => void;
-  onCountryChange: (v: string) => void;
-  onRemove?: () => void;
-}
 
 function BundleRow({ row, countries, onQuantityChange, onCountryChange, onRemove }: BundleRowProps) {
   const [showPicker, setShowPicker] = useState(false);
@@ -213,14 +209,12 @@ function BundleRow({ row, countries, onQuantityChange, onCountryChange, onRemove
                 <Pressable
                   key={c}
                   onPress={() => { onCountryChange(c); setShowPicker(false); }}
-                  className={`px-4 py-3 border-b border-gray-50 ${
-                    row.country === c ? 'bg-primary/5' : ''
-                  }`}
+                  className={`px-4 py-3 border-b border-gray-50 ${row.country === c ? 'bg-primary/5' : ''
+                    }`}
                 >
                   <Text
-                    className={`text-sm ${
-                      row.country === c ? 'text-primary font-semibold' : 'text-gray-700'
-                    }`}
+                    className={`text-sm ${row.country === c ? 'text-primary font-semibold' : 'text-gray-700'
+                      }`}
                   >
                     {c}
                   </Text>

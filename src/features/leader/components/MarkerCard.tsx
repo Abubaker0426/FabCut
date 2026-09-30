@@ -4,12 +4,7 @@
 import React from 'react';
 import { Pressable, Text, View } from 'react-native';
 
-import type { Marker } from '@/types';
-
-interface MarkerCardProps {
-  marker: Marker;
-  onPress: () => void;
-}
+import type { MarkerCardProps } from '@/types/MarkerCard';
 
 export function MarkerCard({ marker, onPress }: MarkerCardProps) {
   return (

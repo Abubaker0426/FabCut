@@ -1,41 +1,14 @@
-import {
-  forwardRef,
-  useCallback,
-  useMemo,
-  ReactNode,
-} from "react";
+import { forwardRef, useCallback, useMemo, } from "react";
 import { View, Text } from "react-native";
-import BottomSheet, {
-  BottomSheetBackdrop,
-  BottomSheetFlatList,
-  BottomSheetScrollView,
-} from "@gorhom/bottom-sheet";
-
-interface AppSheetModalProps {
-  title: string;
-  badge?: number;
-  snapPoints?: (string | number)[];
-  initialIndex?: number;
-  showBackdrop?: boolean;
-  onClose?: () => void;
-  scrollable?: boolean;
-  children: ReactNode;
-}
+import BottomSheet, { BottomSheetBackdrop, BottomSheetFlatList, BottomSheetScrollView, } from "@gorhom/bottom-sheet";
+import type { AppSheetModalProps } from '@/types/AppSheetModal';
 
 const AppSheetModal = forwardRef<BottomSheet, AppSheetModalProps>(
-  (
-    {
-      title,
-      badge,
-      snapPoints: snapPointsProp,
-      initialIndex = -1,
-      showBackdrop = true,
-      onClose,
-      scrollable = true,
-      children,
-    },
-    ref
-  ) => {
+  ({
+    title, badge, snapPoints: snapPointsProp, initialIndex = -1,
+    showBackdrop = true, onClose, scrollable = true, children,
+  },
+    ref) => {
     const snapPoints = useMemo(
       () => snapPointsProp ?? ["15%", "50%", "92%"],
       [snapPointsProp]
@@ -77,9 +50,7 @@ const AppSheetModal = forwardRef<BottomSheet, AppSheetModalProps>(
                 </Text>
               </View>
             )}
-
           </View>
-
         </View>
       ),
       [title, badge]
@@ -120,7 +91,9 @@ const AppSheetModal = forwardRef<BottomSheet, AppSheetModalProps>(
             {children}
           </BottomSheetScrollView>
         ) : (
-          children
+          <View style={{ flex: 1 }}>
+            {children}
+          </View>
         )}
       </BottomSheet>
     );
@@ -128,7 +101,5 @@ const AppSheetModal = forwardRef<BottomSheet, AppSheetModalProps>(
 );
 
 AppSheetModal.displayName = "AppSheetModal";
-
 export { BottomSheetFlatList };
-
 export default AppSheetModal;

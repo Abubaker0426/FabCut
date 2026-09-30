@@ -1,56 +1,19 @@
-/**
- * EndBitJobDetailTab — exactly mirrors fragment_end_bit_job_detail.xml
- *
- * Identical layout to JobDetailTab EXCEPT:
- *  - No "Lay Number" stat row
- *  - Description = itemCode + itemDesc (top-level, not per-part)
- *  - layLength comes from jobDetail.layLength (per-part)
- *  - Tabs are titled by partName
- */
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { FlatList, Pressable, RefreshControlProps, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons'
+import { useRouter } from 'expo-router'
+import { FlatList, Pressable, Text, View } from 'react-native'
 
-import { SizeRow } from '@/components/ui/SizeRow';
-import type { EndBitJobDetail, ScanBarcode } from '@/types';
-import { BarcodeRow } from './BarcodeRow';
+import { SizeRow } from '@/components/ui/SizeRow'
+import type { EndBitJobDetailTabProps } from '@/types/EndBitJobDetailTab'
+import { BarcodeRow } from './BarcodeRow'
 
-interface EndBitJobDetailTabProps {
-  jobDetail: EndBitJobDetail;
-  ocNumber: string;
-  itemCode: string;
-  itemDesc: string;
-  assignedQty: number;
-  cutQty: number;
-  numOfPlies: number;
-  actualPlies: number;
-  scannedBarcodes: ScanBarcode[];
-  onActualPliesChange: (barcode: string, value: string) => void;
-  onValidate?: (barcode: string, actualPlies: number) => void;
-  onDelete?: (barcode: string) => void;
-  onReasonChange?: (barcode: string, reason: string) => void;
-  refreshControl?: React.ReactElement<RefreshControlProps>;
-}
 
 export function EndBitJobDetailTab({
-  jobDetail,
-  ocNumber,
-  itemCode,
-  itemDesc,
-  assignedQty,
-  cutQty,
-  numOfPlies,
-  actualPlies,
-  scannedBarcodes,
-  onActualPliesChange,
-  onValidate,
-  onDelete,
-  onReasonChange,
-  refreshControl,
+  jobDetail, ocNumber, itemCode, itemDesc, assignedQty, cutQty, numOfPlies, actualPlies,
+  scannedBarcodes, validationStates = {}, onActualPliesChange, onValidate, onDelete, onReasonChange, refreshControl,
 }: EndBitJobDetailTabProps) {
-  const router = useRouter();
-  const sizes      = jobDetail.ratioDetails.map((r) => r.size);
-  const quantities = jobDetail.ratioDetails.map((r) => r.ratioQty);
+  const router = useRouter()
+  const sizes = jobDetail.ratioDetails.map((r) => r.size)
+  const quantities = jobDetail.ratioDetails.map((r) => Number(r.quantity) || 0)
 
   return (
     <View className="flex-1 bg-lightBlue">
@@ -103,10 +66,10 @@ export function EndBitJobDetailTab({
 
                 {/* Stats — same as normal job but NO Lay Number */}
                 <StatRow label="Assigned Quantity" value={String(assignedQty)} />
-                <StatRow label="Cut Quantity"       value={String(cutQty)}                 pt />
-                <StatRow label="Lay Length"         value={String(jobDetail.layLength)}    pt />
-                <StatRow label="Number Of Plies"    value={String(numOfPlies)}             pt />
-                <StatRow label="Actual Plies"       value={String(actualPlies)}            pt />
+                <StatRow label="Cut Quantity" value={String(cutQty)} pt />
+                <StatRow label="Lay Length" value={String(jobDetail.layLength)} pt />
+                <StatRow label="Number Of Plies" value={String(numOfPlies)} pt />
+                <StatRow label="Actual Plies" value={String(actualPlies)} pt />
               </View>
             </View>
 
@@ -117,6 +80,7 @@ export function EndBitJobDetailTab({
         renderItem={({ item }) => (
           <BarcodeRow
             item={item}
+            validationState={validationStates[item.barcode] ?? (item.validated ? 'valid' : 'idle')}
             onActualPliesChange={onActualPliesChange}
             onValidate={onValidate}
             onDelete={onDelete}
@@ -125,7 +89,7 @@ export function EndBitJobDetailTab({
         )}
 
         ListEmptyComponent={
-          <Text className="text-center text-gray-400 mt-6 mb-4">
+          <Text className="text-center text-gray-400 mt-8 mb-4">
             No barcodes scanned yet
           </Text>
         }
@@ -150,7 +114,7 @@ export function EndBitJobDetailTab({
         </Pressable>
       </View>
     </View>
-  );
+  )
 }
 
 function StatRow({ label, value, pt }: { label: string; value: string; pt?: boolean }) {
@@ -159,5 +123,5 @@ function StatRow({ label, value, pt }: { label: string; value: string; pt?: bool
       <Text className="flex-1 text-base text-greyText">{label}</Text>
       <Text className="flex-1 text-base font-bold text-gray-900 text-right">{value}</Text>
     </View>
-  );
+  )
 }

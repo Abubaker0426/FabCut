@@ -1,46 +1,12 @@
-/**
- * CustomDropdown
- *
- * Measures the trigger button's exact screen position, then renders
- * the option list in a Modal so it floats above ALL components.
- * Automatically opens upward when near the bottom of the screen.
- */
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRef, useState } from 'react';
-import {
-  Dimensions,
-  Modal,
-  Pressable,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Dimensions, Modal, Pressable, Text, TouchableOpacity, View, } from 'react-native';
+import { CustomDropdownProps, Layout } from "@/types/customDropdown"
 
 const ITEM_HEIGHT = 48; // height of each option row
 const SCREEN = Dimensions.get('window');
 
-interface Layout {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
-
-interface CustomDropdownProps {
-  data: string[];
-  placeholder: string;
-  selectedValue?: string;
-  disabled?: boolean;
-  onSelect: (item: string) => void;
-}
-
-export default function CustomDropdown({
-  data,
-  placeholder,
-  selectedValue,
-  disabled = false,
-  onSelect,
-}: CustomDropdownProps) {
+export default function CustomDropdown({ data, placeholder, selectedValue, disabled = false, onSelect, }: CustomDropdownProps) {
   const triggerRef = useRef<View>(null);
   const [open, setOpen] = useState(false);
   const [layout, setLayout] = useState<Layout | null>(null);
@@ -79,14 +45,12 @@ export default function CustomDropdown({
         ref={triggerRef}
         disabled={disabled}
         onPress={openDropdown}
-        className={`flex-row items-center justify-between border rounded-lg px-3 py-2.5 bg-white ${
-          open ? 'border-primary' : 'border-gray-300'
-        } ${disabled ? 'opacity-50 bg-gray-100' : ''}`}
+        className={`flex-row items-center justify-between border rounded-lg px-3 py-2.5 bg-white ${open ? 'border-primary' : 'border-gray-300'
+          } ${disabled ? 'opacity-50 bg-gray-100' : ''}`}
       >
         <Text
-          className={`text-sm flex-1 mr-2 ${
-            selectedValue ? 'text-gray-800' : 'text-gray-400'
-          }`}
+          className={`text-sm flex-1 mr-2 ${selectedValue ? 'text-gray-800' : 'text-gray-400'
+            }`}
           numberOfLines={1}
         >
           {selectedValue || placeholder}

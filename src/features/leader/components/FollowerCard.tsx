@@ -1,41 +1,35 @@
 /**
  * FollowerCard — mirrors follower_item.xml + FollowerAdapter.java
  *
- * Normal mode:
- *   - lightBlue background
- *   - X button visible (calls getFollowerJob → view job details)
+ * Java Status enum values (Title Case from API):
+ *   "Idle" → available, selectable, green in selection mode
+ *   "Busy" → has a job, not selectable in selection mode, red/dimmed
+ *
+ * Normal mode (viewing followers):
+ *   - White card with table number + status badge
+ *   - X button visible → tap to view/delete follower's job
  *
  * Selection mode (leader assigning a job):
  *   - X button hidden
- *   - IDLE → green background (colorGreenPastel)
- *   - BUSY → red/accent background (disabled, not selectable)
- *   - DONE → primary background
+ *   - Idle  → green background  (selectable)
+ *   - Busy  → red background    (disabled, can't select)
  */
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, Text, View } from 'react-native';
 
-import type { Follower } from '@/types';
+import type { FollowerCardProps } from '@/types/FollowerCard';
 
-// Mirrors Java color resources
-const NORMAL_BG   = '#E6F4FE'; // colorLightBlue
-const IDLE_BG     = '#C8E6C9'; // colorGreenPastel
-const BUSY_BG     = '#FFCDD2'; // colorAccent (light red)
-const DONE_BG     = '#21226b'; // colorPrimary
+// ── Color mapping — mirrors Java color resources ───────────────────────────────
+// Normal mode — white card always
+const NORMAL_BG = '#FFFFFF';
 
-const STATUS_TEXT_COLOR: Record<string, string> = {
-  IDLE: '#16a34a',
-  BUSY: '#dc2626',
-  DONE: '#fff',
-};
+// Selection mode backgrounds
+const IDLE_BG   = '#C8E6C9';  // colorGreenPastel — Idle follower, selectable
+const BUSY_BG   = '#FFCDD2';  // colorAccent (light red) — Busy follower, disabled
 
-interface FollowerCardProps {
-  follower: Follower;
-  /** In selection mode: highlights available followers, hides X button */
-  selectionMode?: boolean;
-  onPress?: () => void;
-  /** X button — calls getFollowerJob (view job details) in normal mode */
-  onDelete?: () => void;
-}
+// Status badge colors
+const IDLE_COLOR = '#16a34a';  // green
+const BUSY_COLOR = '#dc2626';  // red
 
 export function FollowerCard({
   follower,
@@ -43,65 +37,72 @@ export function FollowerCard({
   onPress,
   onDelete,
 }: FollowerCardProps) {
-  const isBusy = follower.status === 'BUSY';
+  const isBusy = follower.status === 'Busy';
 
-  // Background color mirrors FollowerAdapter.java setSelectionMode logic
+  // Background mirrors FollowerAdapter.java setSelectionMode logic
   let bgColor = NORMAL_BG;
   if (selectionMode) {
-    if (follower.status === 'IDLE')      bgColor = IDLE_BG;
-    else if (follower.status === 'BUSY') bgColor = BUSY_BG;
-    else                                  bgColor = DONE_BG;
+    bgColor = isBusy ? BUSY_BG : IDLE_BG;
   }
 
+  const statusColor = isBusy ? BUSY_COLOR : IDLE_COLOR;
+
   return (
-    // In selection mode, BUSY followers are disabled (can't be selected in Java)
     <Pressable
       onPress={selectionMode && isBusy ? undefined : onPress}
-      className="m-2 active:opacity-70"
       disabled={selectionMode && isBusy}
+      className="m-2 active:opacity-60"
     >
       <View
-        className="rounded-xl h-36 items-center justify-center relative"
+        className="rounded-xl items-center justify-center relative"
         style={{
           backgroundColor: bgColor,
-          elevation: 4,
+          elevation: selectionMode ? 3 : 4,
           shadowColor: '#000',
           shadowOpacity: 0.08,
           shadowRadius: 6,
-          opacity: selectionMode && isBusy ? 0.5 : 1,
+          opacity: selectionMode && isBusy ? 0.45 : 1,
+          height: 120,
+          borderWidth: selectionMode && !isBusy ? 2 : 0,
+          borderColor: IDLE_COLOR,
         }}
       >
-        {/* X button — hidden in selection mode (mirrors deleteJob.setVisibility(View.GONE)) */}
+        {/* X button — hidden in selection mode */}
         {!selectionMode && onDelete && (
           <Pressable
             onPress={onDelete}
             className="absolute top-2 right-2 p-1"
             hitSlop={8}
-            accessibilityLabel="View follower job"
+            accessibilityLabel="Delete follower job"
           >
             <Ionicons name="close-circle" size={20} color="#21226b" />
           </Pressable>
         )}
 
-        {/* Table number */}
-        <Text
-          className="text-2xl font-bold"
-          style={{ color: follower.status === 'DONE' && selectionMode ? '#fff' : '#21226b' }}
-        >
-          {follower.tableNumber}
+        {/* Table number — large, always dark primary */}
+        <Text className="text-3xl font-bold text-primary">
+          {follower.tableNumber ?? '?'}
         </Text>
 
-        {/* Status */}
-        <Text
-          className="text-sm font-bold uppercase mt-1"
-          style={{
-            color: selectionMode && follower.status === 'DONE'
-              ? '#fff'
-              : STATUS_TEXT_COLOR[follower.status] ?? '#21226b',
-          }}
+        {/* Status badge */}
+        <View
+          className="mt-1 px-2 py-0.5 rounded-full"
+          style={{ backgroundColor: `${statusColor}20` }}
         >
-          {follower.status}
-        </Text>
+          <Text
+            className="text-xs font-bold uppercase"
+            style={{ color: statusColor }}
+          >
+            {follower.status}
+          </Text>
+        </View>
+
+        {/* Selection mode hint — green tick on idle */}
+        {selectionMode && !isBusy && (
+          <View className="absolute top-2 right-2">
+            <Ionicons name="checkmark-circle" size={18} color={IDLE_COLOR} />
+          </View>
+        )}
       </View>
     </Pressable>
   );
