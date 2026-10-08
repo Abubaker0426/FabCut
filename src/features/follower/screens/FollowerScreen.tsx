@@ -27,6 +27,7 @@ import {
   useEndBitDeleteBarcode,
   useCompleteEndBitJob,
 } from '../hooks/useEndBitBarcodeActions';
+import { useUnregister } from '@/features/auth/hooks/useUnregister';
 
 type ValidationMap = Record<string, 'idle' | 'validating' | 'valid' | 'error'>;
 
@@ -52,14 +53,7 @@ export default function FollowerScreen() {
   const { mutate: submitEndBitDelete }                                   = useEndBitDeleteBarcode();
   const { mutate: submitCompleteEndBit, isPending: isEndBitCompleting }  = useCompleteEndBitJob();
 
-  // ── Ensure deviceId is loaded ──────────────────────────────────────────────
-  useEffect(() => {
-    if (!useAppStore.getState().deviceId) {
-      getDeviceId().then((id) => {
-        if (id) useAppStore.getState().setDeviceId(id);
-      });
-    }
-  }, []);
+  const { handleUnregister } = useUnregister();
 
   // ── Fetch job on mount + refetch on pull-to-refresh ────────────────────────
   const {
@@ -382,6 +376,9 @@ export default function FollowerScreen() {
         title="FabCut"
         badge={jobType === 'END_BIT' ? 'END BIT' : undefined}
         onBack={() => setShowRefresh(true)}
+        overflowMenu={[
+          { label: 'Unregister', onPress: handleUnregister },
+        ]}
       />
 
       <View className="flex-1">

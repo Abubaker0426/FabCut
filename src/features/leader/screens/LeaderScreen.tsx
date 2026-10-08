@@ -1,8 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { FlatList, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { FlatList, Text, View } from 'react-native';import { SafeAreaView } from 'react-native-safe-area-context';
 
 import CustomDropdown from '@/components/Common/CustomDropdown';
 import CustomHeader from '@/components/Common/CustomHeader';
@@ -19,12 +18,16 @@ import { FollowersBottomSheet } from '../components/FollowersBottomSheet';
 import { MarkerCard } from '../components/MarkerCard';
 import { useValidateOc } from '../hooks/useValidateOc';
 import { useFetchMarkers } from '../hooks/useFetchMarkers';
+import { useUnregister } from '@/features/auth/hooks/useUnregister';
 
 type Step = 'form' | 'markers';
 
 export default function LeaderScreen() {
   const router   = useRouter();
   const location = useAppStore((s) => s.location);
+
+  // ── Hook: unregister — shared hook handles deviceId, dialog, API, navigation
+  const { handleUnregister, isUnregistering } = useUnregister();
 
   // ── UI state ────────────────────────────────────────────────────────────────
   const [step, setStep]                 = useState<Step>('form');
@@ -129,7 +132,7 @@ export default function LeaderScreen() {
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
     <SafeAreaView className="flex-1 bg-lightBlue" edges={['top']}>
-      <LoadingOverlay visible={isLoading} />
+      <LoadingOverlay visible={isLoading || isUnregistering} />
 
       <CustomHeader
         title="FabCut"
@@ -138,6 +141,7 @@ export default function LeaderScreen() {
         ]}
         overflowMenu={[
           { label: 'Select Bundle Parts', onPress: () => router.push('/leader/bundle-parts') },
+          { label: 'Unregister',          onPress: handleUnregister },
         ]}
       />
 

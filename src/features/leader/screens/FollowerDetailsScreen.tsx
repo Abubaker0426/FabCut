@@ -1,22 +1,3 @@
-/**
- * FollowerDetailsScreen
- * Mirrors: FollowerDetailsActivity + activity_follower_details.xml
- *
- * Receives the full job response as a JSON route param — no API call needed here.
- * Mirrors Java: FollowerDetailsActivity receives FetchFollowerResponse /
- * FetchFollowerEndBitJobResponse via Intent extras, then parses locally.
- *
- * Normal job:
- *   One DetailItem per jobDetail (itemCode + itemDesc as description, ratioDetails for sizes)
- *   Java: FollowerDetailsPresenter.parseDetails(response)
- *
- * End-bit job:
- *   One DetailItem per jobDetail (itemCode + partName as description, ratioDetails for sizes)
- *   Java: FollowerDetailsPresenter.parseEndBitDetails(response)
- *
- * Background: white — mirrors activity_follower_details.xml (no colorLightBlue)
- */
-
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -44,7 +25,7 @@ function parseNormalBlocks(response: FetchFollowerJobResponse): DetailBlock[] {
   return (response.jobDetails ?? []).map((detail) => ({
     description: `${detail.itemCode}, ${detail.itemDesc}`,
     sizes:       (detail.ratioDetails ?? []).map((r) => r.size),
-    quantities:  (detail.ratioDetails ?? []).map((r) => r.ratioQty),
+    quantities:  (detail.ratioDetails ?? []).map((r) => Number(r.quantity)),
   }));
 }
 
@@ -56,7 +37,7 @@ function parseEndBitBlocks(response: FetchFollowerEndBitJobResponse): DetailBloc
   return (response.jobDetails ?? []).map((detail) => ({
     description: `${response.itemCode}, ${detail.partName}`,
     sizes:       (detail.ratioDetails ?? []).map((r) => r.size),
-    quantities:  (detail.ratioDetails ?? []).map((r) => r.ratioQty),
+    quantities:  (detail.ratioDetails ?? []).map((r) => Number(r.quantity)),
   }));
 }
 

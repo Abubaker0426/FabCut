@@ -23,9 +23,7 @@ export default function BundlePartsScreen() {
   const [submittedOc, setSubmittedOc]   = useState(''); // the OC that was actually queried
 
   // ── Hook: fetch parts on OC blur ──────────────────────────────────────────
-  // Mirrors Java: BundlePartsActivity.onFocusChange(hasFocus=false)
-  //   → mPresenter.fetchParts(ocNo)
-  //   → doFetchPartsForOCCall(ocNo, LocationRequest)
+
   const {
     data: partsData,
     isLoading: isFetching,
