@@ -11,7 +11,9 @@ export const useFetchLayNumbers = (
     queryKey: ['layNumbers', markerId, itemCode, location],
     queryFn: async () => {
       console.log('[useFetchLayNumbers] 📡 GET /end-bits/lay-numbers/{markerId}', {
-        markerId, itemCode, location,
+        markerId,
+        itemCode,
+        location,
       });
       try {
         const res = await fetchLayNumbers(markerId, itemCode, location!);

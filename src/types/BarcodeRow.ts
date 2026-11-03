@@ -9,4 +9,6 @@ export interface BarcodeRowProps {
   onValidate?: (barcode: string, actualPlies: number) => void;
   onDelete?: (barcode: string) => void;
   onReasonChange?: (barcode: string, reason: string) => void;
+  onNoOfLaysChange?: (barcode: string, noOfLays: string) => void;
+  onEndbitsChange?: (barcode: string, endbits: string) => void;
 }

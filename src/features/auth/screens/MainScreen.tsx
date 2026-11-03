@@ -1,20 +1,10 @@
-/**
- * MainScreen — Device Registration / Login
- *
- * Flow:
- *  1. GPS + location validation (useLocationValidation)
- *  2. Device ID loaded + stored (useDeviceId)
- *  3. Check device registration → registered: navigate, not registered: show form
- *  4. Register → navigate to leader/follower
- *
- * Unregister is in leader/follower header overflow menu via useUnregister hook.
- */
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { LoadingOverlay } from '@/components/ui/LoadingOverlay';
 import { useAppStore } from '@/store/appStore';
 import type { Role } from '@/types/common';
 import { LocationPickerModal } from '../components/LocationPickerModal';
@@ -23,18 +13,19 @@ import { useLocationValidation } from '../hooks/useLocationValidation';
 import { useCheckDeviceRegistration } from '../hooks/useCheckDeviceRegistration';
 import { useRegisterDevice } from '../hooks/useRegisterDevice';
 import { toast } from '@/lib/toast';
+import { RegisterFormProps } from '@/types/auth';
 
 type Screen = 'loading' | 'location' | 'register';
 
 export default function MainScreen() {
   const router = useRouter();
 
-  const [screen, setScreen]                             = useState<Screen>('loading');
-  const [role, setRole]                                 = useState<Role>('LEADER');
-  const [tableNumber, setTableNumber]                   = useState('');
+  const [screen, setScreen] = useState<Screen>('loading');
+  const [role, setRole] = useState<Role>('LEADER');
+  const [tableNumber, setTableNumber] = useState('');
   const [locationModalVisible, setLocationModalVisible] = useState(false);
-  const [locations, setLocations]                       = useState<string[]>([]);
-  const [selectedLocation, setSelectedLocation]         = useState<string | null>(null);
+  const [locations, setLocations] = useState<string[]>([]);
+  const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
 
   // ── Hooks ──────────────────────────────────────────────────────────────────
 
@@ -49,30 +40,21 @@ export default function MainScreen() {
     locationsError,
   } = useLocationValidation();
 
-  const { data: deviceRegData, isLoading: isDevRegLoading, error: deviceRegError } =
-    useCheckDeviceRegistration(deviceId, selectedLocation);
+  const {
+    data: deviceRegData,
+    isLoading: isDevRegLoading,
+    error: deviceRegError,
+  } = useCheckDeviceRegistration(deviceId, selectedLocation);
 
   const { mutate: register, isPending: isRegistering } = useRegisterDevice();
 
   // ── Effects ────────────────────────────────────────────────────────────────
 
   useEffect(() => {
-    if (gps.status === 'denied') toast.error('Location permission is required.', 'Permission Denied');
-    if (gps.status === 'error')  toast.error((gps as any).message, 'Location Error');
+    if (gps.status === 'denied')
+      toast.error('Location permission is required.', 'Permission Denied');
+    if (gps.status === 'error') toast.error((gps as any).message, 'Location Error');
   }, [gps.status]);
-
-  useEffect(() => {
-    if (!fetchedLocations) return;
-    if (fetchedLocations.length === 1) {
-      handleLocationSelected(fetchedLocations[0]);
-    } else if (fetchedLocations.length > 1) {
-      setLocations(fetchedLocations);
-      setLocationModalVisible(true);
-      setScreen('location');
-    } else {
-      toast.info('No valid locations found nearby.');
-    }
-  }, [fetchedLocations]);
 
   useEffect(() => {
     if (locationsError) toast.error('Failed to validate location.', 'Network Error');
@@ -100,6 +82,19 @@ export default function MainScreen() {
     useAppStore.getState().setLocation(location);
     setLocationModalVisible(false);
   };
+
+  useEffect(() => {
+    if (!fetchedLocations) return;
+    if (fetchedLocations.length === 1) {
+      handleLocationSelected(fetchedLocations[0]);
+    } else if (fetchedLocations.length > 1) {
+      setLocations(fetchedLocations);
+      setLocationModalVisible(true);
+      setScreen('location');
+    } else {
+      toast.info('No valid locations found nearby.');
+    }
+  }, [fetchedLocations]);
 
   const handleRegister = () => {
     if (role === 'FOLLOWER') {
@@ -136,11 +131,15 @@ export default function MainScreen() {
   const isLoading = isLocationLoading || isDevRegLoading || isRegistering;
 
   const loadingMessage =
-    gps.status === 'loading' ? 'Getting location...'   :
-    isLocationLoading        ? 'Detecting location...' :
-    isDevRegLoading          ? 'Checking device...'    :
-    isRegistering            ? 'Registering...'        :
-                               'Please wait...';
+    gps.status === 'loading'
+      ? 'Getting location...'
+      : isLocationLoading
+        ? 'Detecting location...'
+        : isDevRegLoading
+          ? 'Checking device...'
+          : isRegistering
+            ? 'Registering...'
+            : 'Please wait...';
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
@@ -153,16 +152,13 @@ export default function MainScreen() {
         onDismiss={() => {}}
       />
 
-      {isLoading && (
-        <View className="flex-1 items-center justify-center">
-          <Text className="text-4xl font-bold text-primary tracking-widest mb-4">FabCut</Text>
-          <ActivityIndicator size="large" color="#208AEF" />
-          <Text className="text-sm text-primary/70 mt-3">{loadingMessage}</Text>
-        </View>
-      )}
+      <LoadingOverlay visible={isLoading} message={loadingMessage} />
 
       {!isLoading && screen === 'register' && (
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1">
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          className="flex-1"
+        >
           <ScrollView
             contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: 24 }}
             keyboardShouldPersistTaps="handled"
@@ -196,23 +192,25 @@ export default function MainScreen() {
   );
 }
 
-// ─── Register Form ────────────────────────────────────────────────────────────
+// ─── role Register Form ────────────────────────────────────────────────────────────
 
-interface RegisterFormProps {
-  role: Role;
-  setRole: (r: Role) => void;
-  tableNumber: string;
-  setTableNumber: (v: string) => void;
-  onRegister: () => void;
-}
-
-function RegisterForm({ role, setRole, tableNumber, setTableNumber, onRegister }: RegisterFormProps) {
+function RegisterForm({
+  role,
+  setRole,
+  tableNumber,
+  setTableNumber,
+  onRegister,
+}: RegisterFormProps) {
   return (
     <>
       <Text className="text-base font-semibold text-gray-700 mb-3">Select Role</Text>
       <View className="flex-row mb-5 gap-3">
-        <RoleChip label="Leader"   active={role === 'LEADER'}   onPress={() => setRole('LEADER')} />
-        <RoleChip label="Follower" active={role === 'FOLLOWER'} onPress={() => setRole('FOLLOWER')} />
+        <RoleChip label="Leader" active={role === 'LEADER'} onPress={() => setRole('LEADER')} />
+        <RoleChip
+          label="Follower"
+          active={role === 'FOLLOWER'}
+          onPress={() => setRole('FOLLOWER')}
+        />
       </View>
       {role === 'FOLLOWER' && (
         <Input
@@ -229,7 +227,15 @@ function RegisterForm({ role, setRole, tableNumber, setTableNumber, onRegister }
   );
 }
 
-function RoleChip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
+function RoleChip({
+  label,
+  active,
+  onPress,
+}: {
+  label: string;
+  active: boolean;
+  onPress: () => void;
+}) {
   return (
     <Pressable
       onPress={onPress}

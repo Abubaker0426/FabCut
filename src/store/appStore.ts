@@ -42,12 +42,12 @@ const defaultState = {
 export const useAppStore = create<AppState>((set) => ({
   ...defaultState,
 
-  setDeviceId:        (deviceId)        => set({ deviceId }),
-  setRole:            (role)            => set({ role }),
-  setLocation:        (location)        => set({ location }),
-  setTableNumber:     (tableNumber)     => set({ tableNumber }),
-  setRegistered:      (isRegistered)    => set({ isRegistered }),
-  setSelectedMarker:  (selectedMarker)  => set({ selectedMarker }),
+  setDeviceId: (deviceId) => set({ deviceId }),
+  setRole: (role) => set({ role }),
+  setLocation: (location) => set({ location }),
+  setTableNumber: (tableNumber) => set({ tableNumber }),
+  setRegistered: (isRegistered) => set({ isRegistered }),
+  setSelectedMarker: (selectedMarker) => set({ selectedMarker }),
   setLastScannedCode: (lastScannedCode) => set({ lastScannedCode }),
   reset: () => set(defaultState),
 }));

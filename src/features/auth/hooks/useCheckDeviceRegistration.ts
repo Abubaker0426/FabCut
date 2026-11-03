@@ -2,22 +2,14 @@ import { useQuery } from '@tanstack/react-query';
 import { checkDeviceRegistration } from '@/lib/api';
 import type { IsDevRegResponse } from '@/types/auth';
 
-/**
- * Calls GET /fabcut/cutting/registrations/{deviceId}?location=...
- * Returns { devRegStatus: boolean, role: string }
- * Mirrors: MainPresenter#doIsDeviceRegisteredCall
- */
-export const useCheckDeviceRegistration = (
-  deviceId: string | null,
-  location: string | null,
-) =>
+export const useCheckDeviceRegistration = (deviceId: string | null, location: string | null) =>
   useQuery<IsDevRegResponse>({
     queryKey: ['deviceRegistration', deviceId, location],
     queryFn: async () => {
-      console.log(
-        '[useCheckDeviceRegistration] 📡 GET /registrations/{deviceId}?location=',
-        { deviceId, location },
-      );
+      console.log('[useCheckDeviceRegistration] 📡 GET /registrations/{deviceId}?location=', {
+        deviceId,
+        location,
+      });
       try {
         const res = await checkDeviceRegistration(deviceId!, location!);
         console.log('[useCheckDeviceRegistration] ✅ Response:', res.data);
@@ -32,5 +24,7 @@ export const useCheckDeviceRegistration = (
       }
     },
     enabled: !!deviceId && !!location,
+    staleTime: 0, // always re-fetch — never serve a cached result
+    gcTime: 0, // discard cache immediately after unmount
     retry: false,
   });

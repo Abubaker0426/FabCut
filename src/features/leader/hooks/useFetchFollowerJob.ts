@@ -2,18 +2,13 @@ import { useMutation } from '@tanstack/react-query';
 import { fetchFollowerJob, fetchFollowerEndBitJob } from '@/lib/api';
 import type { FetchFollowerJobResponse, FetchFollowerEndBitJobResponse } from '@/types/follower';
 
-
 export type FollowerJobResult =
   | { type: 'NORMAL'; data: FetchFollowerJobResponse }
   | { type: 'END_BIT'; data: FetchFollowerEndBitJobResponse }
   | { type: 'NONE' };
 
 export const useFetchFollowerJob = () =>
-  useMutation<
-    FollowerJobResult,
-    Error,
-    { deviceId: string; location: string }
-  >({
+  useMutation<FollowerJobResult, Error, { deviceId: string; location: string }>({
     mutationFn: async ({ deviceId, location }) => {
       console.log('[useFetchFollowerJob] 📡 GET /jobs/{deviceId}', { deviceId, location });
       try {
@@ -39,7 +34,6 @@ export const useFetchFollowerJob = () =>
         // Step 3 — neither job exists
         console.log('[useFetchFollowerJob] ℹ️  No job assigned to this follower');
         return { type: 'NONE' };
-
       } catch (err: any) {
         console.error(
           '[useFetchFollowerJob] ❌ Failed:',

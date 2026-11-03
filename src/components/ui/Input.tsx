@@ -1,10 +1,5 @@
 import React, { forwardRef } from 'react';
-import {
-  Text,
-  TextInput,
-  type TextInputProps,
-  View,
-} from 'react-native';
+import { Text, TextInput, type TextInputProps, View } from 'react-native';
 
 interface InputProps extends TextInputProps {
   label?: string;
@@ -18,9 +13,7 @@ export const Input = forwardRef<TextInput, InputProps>(
   ({ label, error, className = '', rightIcon, ...props }, ref) => {
     return (
       <View className="w-full">
-        {label ? (
-          <Text className="text-sm font-medium text-gray-700 mb-1">{label}</Text>
-        ) : null}
+        {label ? <Text className="text-sm font-medium text-gray-700 mb-1">{label}</Text> : null}
 
         {/* Wrapper needed so rightIcon can be absolutely positioned inside */}
         <View className="relative justify-center">
@@ -37,13 +30,10 @@ export const Input = forwardRef<TextInput, InputProps>(
           ) : null}
         </View>
 
-        {error ? (
-          <Text className="text-red-500 text-xs mt-1">{error}</Text>
-        ) : null}
+        {error ? <Text className="text-red-500 text-xs mt-1">{error}</Text> : null}
       </View>
     );
-  }
+  },
 );
 
 Input.displayName = 'Input';
-

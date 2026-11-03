@@ -1,12 +1,18 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRef, useState } from 'react';
-import { Dimensions, Modal, Pressable, Text, TouchableOpacity, View, } from 'react-native';
-import { CustomDropdownProps, Layout } from "@/types/customDropdown"
+import { Dimensions, Modal, Pressable, Text, TouchableOpacity, View } from 'react-native';
+import { CustomDropdownProps, Layout } from '@/types/customDropdown';
 
 const ITEM_HEIGHT = 48; // height of each option row
 const SCREEN = Dimensions.get('window');
 
-export default function CustomDropdown({ data, placeholder, selectedValue, disabled = false, onSelect, }: CustomDropdownProps) {
+export default function CustomDropdown({
+  data,
+  placeholder,
+  selectedValue,
+  disabled = false,
+  onSelect,
+}: CustomDropdownProps) {
   const triggerRef = useRef<View>(null);
   const [open, setOpen] = useState(false);
   const [layout, setLayout] = useState<Layout | null>(null);
@@ -34,8 +40,8 @@ export default function CustomDropdown({ data, placeholder, selectedValue, disab
 
   const listTop = layout
     ? opensUp
-      ? layout.y - listHeight - 4          // above trigger
-      : layout.y + layout.height + 4       // below trigger
+      ? layout.y - listHeight - 4 // above trigger
+      : layout.y + layout.height + 4 // below trigger
     : 0;
 
   return (
@@ -45,12 +51,12 @@ export default function CustomDropdown({ data, placeholder, selectedValue, disab
         ref={triggerRef}
         disabled={disabled}
         onPress={openDropdown}
-        className={`flex-row items-center justify-between border rounded-lg px-3 py-2.5 bg-white ${open ? 'border-primary' : 'border-gray-300'
-          } ${disabled ? 'opacity-50 bg-gray-100' : ''}`}
+        className={`flex-row items-center justify-between border rounded-lg px-3 py-2.5 bg-white ${
+          open ? 'border-primary' : 'border-gray-300'
+        } ${disabled ? 'opacity-50 bg-gray-100' : ''}`}
       >
         <Text
-          className={`text-sm flex-1 mr-2 ${selectedValue ? 'text-gray-800' : 'text-gray-400'
-            }`}
+          className={`text-sm flex-1 mr-2 ${selectedValue ? 'text-gray-800' : 'text-gray-400'}`}
           numberOfLines={1}
         >
           {selectedValue || placeholder}
@@ -72,11 +78,7 @@ export default function CustomDropdown({ data, placeholder, selectedValue, disab
           statusBarTranslucent
         >
           {/* Full-screen backdrop — tap anywhere to close */}
-          <TouchableOpacity
-            activeOpacity={1}
-            onPress={closeDropdown}
-            style={{ flex: 1 }}
-          >
+          <TouchableOpacity activeOpacity={1} onPress={closeDropdown} style={{ flex: 1 }}>
             {/* Option list — absolutely positioned at measured location */}
             <View
               style={{
@@ -107,8 +109,7 @@ export default function CustomDropdown({ data, placeholder, selectedValue, disab
                     justifyContent: 'center',
                     borderBottomWidth: index === data.length - 1 ? 0 : 1,
                     borderBottomColor: '#f3f4f6',
-                    backgroundColor:
-                      selectedValue === item ? '#eef2ff' : '#ffffff',
+                    backgroundColor: selectedValue === item ? '#eef2ff' : '#ffffff',
                   }}
                 >
                   <Text

@@ -2,11 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchPartsForOC } from '@/lib/api';
 import type { FetchPartsResponse } from '@/types/leader';
 
-export const useFetchPartsForOC = (
-  ocNo: string,
-  location: string | null,
-  enabled: boolean,
-) =>
+export const useFetchPartsForOC = (ocNo: string, location: string | null, enabled: boolean) =>
   useQuery<FetchPartsResponse>({
     queryKey: ['partsForOC', ocNo, location],
     queryFn: async () => {

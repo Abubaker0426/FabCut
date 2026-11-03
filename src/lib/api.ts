@@ -2,14 +2,24 @@ import { apiClient } from './client';
 import { ENDPOINTS } from './endpoints';
 import type { IsDevRegResponse, RegisterRequest, UnregisterRequest } from '../types/auth';
 import type {
-  OcItemCode, MarkerResponse, JobDetailsResponse, Follower, JobListItem,
-  AssignJobRequest, AssignEndBitJobRequest,
-  FetchPartsResponse, UpdateBundlePartsRequest, AddBarcodesRequest,
+  OcItemCode,
+  MarkerResponse,
+  JobDetailsResponse,
+  Follower,
+  JobListItem,
+  AssignJobRequest,
+  AssignEndBitJobRequest,
+  FetchPartsResponse,
+  UpdateBundlePartsRequest,
+  AddBarcodesRequest,
 } from '../types/leader';
 import type {
-  FetchFollowerJobResponse, FetchFollowerEndBitJobResponse,
-  ScanBarcodeRequest, ScanBarcodeResponse,
-  EndBitJobRequest, ValidateActualPliesRequest,
+  FetchFollowerJobResponse,
+  FetchFollowerEndBitJobResponse,
+  ScanBarcodeRequest,
+  ScanBarcodeResponse,
+  EndBitJobRequest,
+  ValidateActualPliesRequest,
 } from '../types/follower';
 
 // ─── Location ─────────────────────────────────────────────────────────────────
@@ -61,9 +71,12 @@ export const fetchFollowerJob = (deviceId: string, location: string) =>
   });
 
 export const fetchFollowerEndBitJob = (deviceId: string, location: string) =>
-  apiClient.get<FetchFollowerEndBitJobResponse>(ENDPOINTS.LEADER.GET_FOLLOWER_END_BIT_JOB(deviceId), {
-    params: { location },
-  });
+  apiClient.get<FetchFollowerEndBitJobResponse>(
+    ENDPOINTS.LEADER.GET_FOLLOWER_END_BIT_JOB(deviceId),
+    {
+      params: { location },
+    },
+  );
 
 // ─── Leader — Assign Jobs ─────────────────────────────────────────────────────
 export const assignJobToFollower = (deviceId: string, data: AssignJobRequest) =>
@@ -104,8 +117,11 @@ export const scanBarcode = (jobId: string, barcode: string, data: ScanBarcodeReq
 export const removeBarcode = (jobId: string, barcode: string) =>
   apiClient.delete<boolean>(ENDPOINTS.FOLLOWER.REMOVE_BARCODE(jobId, barcode));
 
-export const validateActualPlies = (jobId: string, barcode: string, data: ValidateActualPliesRequest) =>
-  apiClient.put<boolean>(ENDPOINTS.FOLLOWER.VALIDATE_PLIES(jobId, barcode), data);
+export const validateActualPlies = (
+  jobId: string,
+  barcode: string,
+  data: ValidateActualPliesRequest,
+) => apiClient.put<boolean>(ENDPOINTS.FOLLOWER.VALIDATE_PLIES(jobId, barcode), data);
 
 // ─── Follower — End-bit Job ───────────────────────────────────────────────────
 export const getMyEndBitJob = (deviceId: string, location: string) =>
@@ -117,7 +133,10 @@ export const completeEndBitJob = (jobId: string, data: EndBitJobRequest) =>
   apiClient.put<boolean>(ENDPOINTS.FOLLOWER.COMPLETE_END_BIT_JOB(jobId), data);
 
 export const scanEndBitBarcode = (
-  jobId: string, barcode: string, partName: string, data: EndBitJobRequest,
+  jobId: string,
+  barcode: string,
+  partName: string,
+  data: EndBitJobRequest,
 ) =>
   apiClient.post<ScanBarcodeResponse>(
     ENDPOINTS.FOLLOWER.SCAN_END_BIT_BARCODE(jobId, barcode),
@@ -126,7 +145,10 @@ export const scanEndBitBarcode = (
   );
 
 export const removeEndBitBarcode = (
-  jobId: string, barcode: string, partName: string, data: EndBitJobRequest,
+  jobId: string,
+  barcode: string,
+  partName: string,
+  data: EndBitJobRequest,
 ) =>
   apiClient.delete<boolean>(ENDPOINTS.FOLLOWER.REMOVE_END_BIT_BARCODE(jobId, barcode), {
     data,
@@ -134,7 +156,10 @@ export const removeEndBitBarcode = (
   });
 
 export const validateEndBitActualPlies = (
-  jobId: string, barcode: string, partName: string, data: ValidateActualPliesRequest,
+  jobId: string,
+  barcode: string,
+  partName: string,
+  data: ValidateActualPliesRequest,
 ) =>
   apiClient.put<boolean>(ENDPOINTS.FOLLOWER.VALIDATE_END_BIT_PLIES(jobId, barcode), data, {
     params: { partName },
@@ -154,4 +179,3 @@ export const addBarcodesForOC = (ocNo: string, data: AddBarcodesRequest) =>
 
 export const fetchCountries = (ocNo: string) =>
   apiClient.get<string[]>(ENDPOINTS.PARTS.GET_COUNTRIES(ocNo));
-        

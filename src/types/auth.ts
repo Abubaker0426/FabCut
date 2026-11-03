@@ -36,3 +36,11 @@ export interface ValidateLocationRequest {
   latitude: number;
   longitude: number;
 }
+
+export interface RegisterFormProps {
+  role: Role;
+  setRole: (r: Role) => void;
+  tableNumber: string;
+  setTableNumber: (v: string) => void;
+  onRegister: () => void;
+}

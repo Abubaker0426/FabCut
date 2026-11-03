@@ -1,8 +1,7 @@
-
 import type { JobType } from './common';
 export interface NormalJobRatioDetail {
   size: string;
-  quantity: string | number;  
+  quantity: string | number;
   ratio: number;
 }
 
@@ -14,9 +13,9 @@ export interface NormalJobDetail {
 }
 
 export interface FetchFollowerJobResponse {
-  jobId: number;              // API returns number e.g. 205763
+  jobId: number; // API returns number e.g. 205763
   ocNumber: string;
-  layLength: string;          // API returns string e.g. "6.90"
+  layLength: string; // API returns string e.g. "6.90"
   fitType: string;
   jobDetails: NormalJobDetail[];
   assignedQty?: number;
@@ -30,7 +29,7 @@ export interface FetchFollowerJobResponse {
 
 export interface EndBitRatioDetail {
   size: string;
-  quantity: string | number;  // keep consistent with NormalJobRatioDetail
+  quantity: string | number; // keep consistent with NormalJobRatioDetail
   ratio: number;
 }
 
@@ -63,11 +62,13 @@ export interface ScanBarcode {
   itemCode: string;
   reason?: string;
   validated: boolean;
+  noOfLays?: number;
+  endbits?: number;
 }
 
 export interface ScanBarcodeResponse {
-  length: number;   // fabric length of the bundle
-  plies: number;    // expected ply count for this bundle
+  length: number; // fabric length of the bundle
+  plies: number; // expected ply count for this bundle
 }
 
 export interface ScanBarcodeRequest {
@@ -81,6 +82,8 @@ export interface EndBitJobRequest {
 
 export interface ValidateActualPliesRequest {
   actualPlies: number;
-  deviceId?: string;   // required for end-bit, not sent for normal job
-  location?: string;   // required for end-bit, not sent for normal job
+  endBits?: number;
+  numberOfLays?: number;
+  deviceId?: string; // required for end-bit, not sent for normal job
+  location?: string; // required for end-bit, not sent for normal job
 }

@@ -2,11 +2,6 @@ import { useMutation } from '@tanstack/react-query';
 import { registerDevice } from '@/lib/api';
 import type { RegisterRequest } from '@/types/auth';
 
-/**
- * Calls POST /fabcut/cutting/registrations/{deviceId}
- * Body: { location, role, tableNumber }
- * Mirrors: MainPresenter#register
- */
 export const useRegisterDevice = () =>
   useMutation<boolean, Error, { deviceId: string; data: RegisterRequest }>({
     mutationFn: async ({ deviceId, data }) => {

@@ -3,15 +3,11 @@ import { getMyJob, getMyEndBitJob } from '@/lib/api';
 import type { FetchFollowerJobResponse, FetchFollowerEndBitJobResponse } from '@/types/follower';
 
 export type MyJobResult =
-  | { type: 'NORMAL';  data: FetchFollowerJobResponse }
+  | { type: 'NORMAL'; data: FetchFollowerJobResponse }
   | { type: 'END_BIT'; data: FetchFollowerEndBitJobResponse }
   | { type: 'NONE' };
 
-export const useGetMyJob = (
-  deviceId: string,
-  location: string | null,
-  enabled: boolean = true,
-) =>
+export const useGetMyJob = (deviceId: string, location: string | null, enabled: boolean = true) =>
   useQuery<MyJobResult>({
     queryKey: ['myJob', deviceId, location],
     queryFn: async () => {
@@ -39,7 +35,6 @@ export const useGetMyJob = (
         // Step 3 — no job at all
         console.log('[useGetMyJob] ℹ️  No job assigned to this device');
         return { type: 'NONE' };
-
       } catch (err: any) {
         console.error(
           '[useGetMyJob] ❌ Failed:',
@@ -50,6 +45,6 @@ export const useGetMyJob = (
       }
     },
     enabled: !!deviceId && !!location && enabled,
-    staleTime: 0,   // always re-fetch on refresh
+    staleTime: 0, // always re-fetch on refresh
     retry: false,
   });

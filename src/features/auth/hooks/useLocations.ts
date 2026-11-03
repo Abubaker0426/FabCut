@@ -1,11 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { validateLocation } from '@/lib/api';
 
-/**
- * Calls GET /service/validate/locations with lat/lng as query params.
- * The Java backend returns a plain List<String> of location name strings.
- * Mirrors: MainPresenter#doValidateLocationCall
- */
 export const useLocations = (coords: { latitude: number; longitude: number } | null) =>
   useQuery<string[]>({
     queryKey: ['locations', coords],
@@ -21,7 +16,8 @@ export const useLocations = (coords: { latitude: number; longitude: number } | n
           '[useLocations] ❌ API call failed:',
           err?.response?.status ?? 'No response',
           err?.response?.data ?? err?.message,
-          'code:', err?.code,
+          'code:',
+          err?.code,
           err,
         );
         throw err;

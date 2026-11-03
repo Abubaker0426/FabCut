@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { useUnregisterDevice } from './useUnregisterDevice';
 import { useDeviceId } from './useDeviceId';
 import { useAppStore } from '@/store/appStore';
+import { queryClient } from '@/lib/queryClient';
 import { toast } from '@/lib/toast';
 import type { Role } from '@/types/common';
 
@@ -22,9 +23,9 @@ import type { Role } from '@/types/common';
  *   const { handleUnregister, isUnregistering } = useUnregister();
  */
 export const useUnregister = () => {
-  const router   = useRouter();
+  const router = useRouter();
   const location = useAppStore((s) => s.location);
-  const role     = useAppStore((s) => s.role);
+  const role = useAppStore((s) => s.role);
   const deviceId = useDeviceId(); // loads + stores deviceId if missing
 
   const { mutate: unregister, isPending: isUnregistering } = useUnregisterDevice();
@@ -48,10 +49,16 @@ export const useUnregister = () => {
         onSuccess: () => {
           console.log('[useUnregister] ✅ Unregistered — resetting store and navigating to /');
           useAppStore.getState().reset();
+          // Purge the device-registration cache so MainScreen always re-checks after unregister
+          queryClient.removeQueries({ queryKey: ['deviceRegistration'] });
           router.replace('/');
         },
         onError: (err: any) => {
-          console.error('[useUnregister] ❌ Failed:', err?.response?.status, err?.response?.data ?? err?.message);
+          console.error(
+            '[useUnregister] ❌ Failed:',
+            err?.response?.status,
+            err?.response?.data ?? err?.message,
+          );
           toast.apiError(err, 'Unregister Failed');
         },
       },
@@ -64,7 +71,7 @@ export const useUnregister = () => {
       'Unregister device',
       'Are you sure you want to unregister this device?',
       [
-        { text: 'NO',  style: 'cancel' },
+        { text: 'NO', style: 'cancel' },
         { text: 'YES', style: 'destructive', onPress: performUnregister },
       ],
       { cancelable: true },

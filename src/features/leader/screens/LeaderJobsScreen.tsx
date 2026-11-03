@@ -8,7 +8,7 @@ import { LoadingOverlay } from '@/components/ui/LoadingOverlay';
 import { SizeRow } from '@/components/ui/SizeRow';
 import { toast } from '@/lib/toast';
 import { useAppStore } from '@/store/appStore';
-import type { MarkerItem, OcLay, Ratio, AssignJobRequest, AssignEndBitJobRequest } from '@/types/leader';
+import type { OcLay, Ratio, AssignJobRequest, AssignEndBitJobRequest } from '@/types/leader';
 
 import { EditBundleModal } from '../components/EditBundleModal';
 import { EditEndBitJobModal } from '../components/EditEndBitJobModal';
@@ -52,38 +52,35 @@ export default function LeaderJobsScreen() {
   } = useFetchJobDetails(marker?.markerUnique ?? '');
 
   // Group ratios by ratioNumber — each group = one RatioCard
-  const ratios       = jobDetails?.ratios ?? [];
-  const groups       = groupRatios(ratios);
+  const ratios = jobDetails?.ratios ?? [];
+  const groups = groupRatios(ratios);
   const ratioNumbers = Object.keys(groups).map(Number);
 
   // ── UI state ─────────────────────────────────────────────────────────────────
-  const [sheetOpen, setSheetOpen]           = useState(false);
-  const [selectionMode, setSelectionMode]   = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [selectionMode, setSelectionMode] = useState(false);
   const [editJobVisible, setEditJobVisible] = useState(false);
-  const [endBitVisible, setEndBitVisible]   = useState(false);
-  const [bundleVisible, setBundleVisible]   = useState(false);
-  const [selectedRatio, setSelectedRatio]   = useState<number | null>(null);
-  const [selectedJob, setSelectedJob]       = useState<OcLay | null>(null);
+  const [endBitVisible, setEndBitVisible] = useState(false);
+  const [bundleVisible, setBundleVisible] = useState(false);
+  const [selectedRatio, setSelectedRatio] = useState<number | null>(null);
+  const [selectedJob, setSelectedJob] = useState<OcLay | null>(null);
 
   // Pending assign request — built in EditJobModal, consumed when follower is picked
-  // Mirrors Java: request stored after prepareJobData(), used in LeaderActivity.submit()
-  const [pendingRequest, setPendingRequest]             = useState<AssignJobRequest | null>(null);
+  const [pendingRequest, setPendingRequest] = useState<AssignJobRequest | null>(null);
   // Pending end-bit request — built in EditEndBitJobModal, same follower-pick pattern
-  const [pendingEndBitRequest, setPendingEndBitRequest] = useState<AssignEndBitJobRequest | null>(null);
+  const [pendingEndBitRequest, setPendingEndBitRequest] = useState<AssignEndBitJobRequest | null>(
+    null,
+  );
 
   // ── Hook: assign normal job to follower ──────────────────────────────────────
-  const { mutate: assignJob,       isPending: isAssigning }       = useAssignJob();
+  const { mutate: assignJob, isPending: isAssigning } = useAssignJob();
   // ── Hook: assign end-bit job to follower ─────────────────────────────────────
   const { mutate: assignEndBitJob, isPending: isAssigningEndBit } = useAssignEndBitJob();
 
   // ── Hook: lay numbers for end-bit modal ──────────────────────────────────────
   // Fires only when endBitVisible=true and marker has exactly 1 item
-  // Mirrors Java: EditEndBitJobDialog opens → mPresenter.fetchLayNumbers(markerId, itemCode, location)
   const endBitItemCode = marker?.items?.[0]?.itemCode ?? '';
-  const {
-    data: layNumbers,
-    isLoading: isLayNumbersLoading,
-  } = useFetchLayNumbers(
+  const { data: layNumbers, isLoading: isLayNumbersLoading } = useFetchLayNumbers(
     marker?.markerUnique ?? '',
     endBitItemCode,
     location,
@@ -91,28 +88,22 @@ export default function LeaderJobsScreen() {
   );
 
   // ── Hook: fetch parts for end-bit modal ──────────────────────────────────────
-  // Mirrors Java: EditEndBitJobDialogPresenter.fetchPartNames(ocNo)
-  //   → doFetchPartsForOCCall(ocNo, LocationRequest) → updatePartNamesList(parts)
-  const {
-    data: partsData,
-    isLoading: isPartsLoading,
-  } = useFetchPartsForOC(
+  const { data: partsData, isLoading: isPartsLoading } = useFetchPartsForOC(
     marker?.ocNumber ?? '',
     location,
     endBitVisible,
   );
 
   // ── Pull-to-refresh ──────────────────────────────────────────────────────────
-  // Mirrors Java: SwipeRefreshLayout → mPresenter.fetchJobDetails()
-  const onRefresh = () => { refetch(); };
+  const onRefresh = () => {
+    refetch();
+  };
 
   // ── After job assigned → open bottom sheet in follower selection mode ────────
-  // Mirrors Java: after EditJobDialog.onSubmit → openFollowerSelectionSheet()
-  // Stores the built AssignJobRequest — used when the leader picks a follower
   const handleJobAssigned = (builtRequest: AssignJobRequest) => {
     setEditJobVisible(false);
     setPendingRequest(builtRequest);
-    setSelectionMode(true);   // IDLE=green (selectable), BUSY=greyed out
+    setSelectionMode(true); // IDLE=green (selectable), BUSY=greyed out
     setSheetOpen(true);
   };
 
@@ -131,7 +122,11 @@ export default function LeaderJobsScreen() {
   // ── Render ────────────────────────────────────────────────────────────────────
   return (
     <SafeAreaView className="flex-1 bg-lightBlue" edges={['top']}>
-      <LoadingOverlay visible={isLoading || isAssigning || isAssigningEndBit || isLayNumbersLoading || isPartsLoading} />
+      <LoadingOverlay
+        visible={
+          isLoading || isAssigning || isAssigningEndBit || isLayNumbersLoading || isPartsLoading
+        }
+      />
 
       <CustomHeader
         title={marker?.ocNumber ?? 'Jobs'}
@@ -144,18 +139,18 @@ export default function LeaderJobsScreen() {
       <FlatList
         data={ratioNumbers}
         keyExtractor={(n) => String(n)}
-        refreshControl={
-          <RefreshControl refreshing={isRefetching} onRefresh={onRefresh} />
-        }
+        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={onRefresh} />}
         contentContainerStyle={{ paddingBottom: 80 }}
         ListHeaderComponent={
           <View className="mx-2 mt-3 mb-1">
             {/* Job info banner — custName / styleNo / itemDesc from API */}
             {jobDetails && (
-              <View className="bg-white rounded-lg px-4 py-3 mb-2"
-                style={{ elevation: 2, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 4 }}>
+              <View
+                className="bg-white rounded-lg px-4 py-3 mb-2"
+                style={{ elevation: 2, shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 4 }}
+              >
                 <Text className="text-xs text-gray-500 uppercase tracking-wider">
-                  {jobDetails.custName}  ·  {jobDetails.styleNo}
+                  {jobDetails.custName} · {jobDetails.styleNo}
                 </Text>
                 <Text className="text-sm font-semibold text-gray-800 mt-0.5">
                   {jobDetails.itemDesc}
@@ -244,17 +239,17 @@ export default function LeaderJobsScreen() {
           const itemDesc = marker?.items.find((i) => i.itemCode === data.itemCode)?.itemDesc ?? '';
 
           const request: AssignEndBitJobRequest = {
-            markerId:   marker?.markerUnique ?? '',
-            location:   location ?? '',
-            layNumber:  parseInt(data.layNumber, 10) || 0,
-            itemCode:   data.itemCode,
+            markerId: marker?.markerUnique ?? '',
+            location: location ?? '',
+            layNumber: parseInt(data.layNumber, 10) || 0,
+            itemCode: data.itemCode,
             itemDesc,
             // One jobDetail per selected part — mirrors Java selectedParts loop
             jobDetails: data.selectedParts.map((partName) => ({
               partName,
               layLength: 0,
               ratioDetails: (ratioNumbers.length > 0 ? groups[ratioNumbers[0]] : []).map((r) => ({
-                size:     r.size,
+                size: r.size,
                 quantity: parseInt(data.quantities[`${partName}___${r.size}`] ?? '0', 10) || 0,
               })),
             })),
@@ -266,13 +261,14 @@ export default function LeaderJobsScreen() {
       {/* Bundle split — tap a job in the Jobs tab */}
       <EditBundleModal
         visible={bundleVisible}
-        ocNumber={selectedJob?.ocNo ?? ''}
-        jobId={selectedJob?.jobId ?? ''}
-        totalQuantity={100}
-        onDismiss={() => { setBundleVisible(false); setSelectedJob(null); }}
-        onSubmit={(rows) => {
+        job={selectedJob}
+        onDismiss={() => {
           setBundleVisible(false);
-          console.log('Bundle split:', rows);
+          setSelectedJob(null);
+        }}
+        onSubmit={() => {
+          setBundleVisible(false);
+          setSelectedJob(null);
         }}
       />
 
@@ -280,7 +276,10 @@ export default function LeaderJobsScreen() {
       <FollowersBottomSheet
         visible={sheetOpen}
         selectionMode={selectionMode}
-        onClose={() => { setSheetOpen(false); setSelectionMode(false); }}
+        onClose={() => {
+          setSheetOpen(false);
+          setSelectionMode(false);
+        }}
         onFollowerPress={(follower) => {
           const hasNormal = !!pendingRequest;
           const hasEndBit = !!pendingEndBitRequest;
@@ -334,8 +333,8 @@ export default function LeaderJobsScreen() {
 // Two dynamic rows: sizes on top, ratios + quantities below. No static label.
 
 function RatioCard({ rows, onPress }: { rows: Ratio[]; onPress: () => void }) {
-  const sizes      = rows.map((r) => r.size);
-  const ratios     = rows.map((r) => String(r.ratio));
+  const sizes = rows.map((r) => r.size);
+  const ratios = rows.map((r) => String(r.ratio));
   const quantities = rows.map((r) => String(r.ratioQty));
 
   return (

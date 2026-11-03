@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import * as ExpoLocation from 'expo-location';
+import { useAuthStore } from '@/store/authStore';
 
 export type GpsState =
   | { status: 'idle' }
@@ -8,14 +9,12 @@ export type GpsState =
   | { status: 'denied' }
   | { status: 'error'; message: string };
 
-/**
- * Requests foreground location permission and fetches GPS coords on mount.
- * Mirrors: MainActivity#startLocationUpdates → mLocationCallback
- */
 export const useGpsCoords = () => {
   const [state, setState] = useState<GpsState>({ status: 'idle' });
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
   useEffect(() => {
+    if (!isAuthenticated) return; // don't run before login
     (async () => {
       setState({ status: 'loading' });
       console.log('[useGpsCoords] 🚀 Requesting location permission...');
@@ -44,7 +43,7 @@ export const useGpsCoords = () => {
         setState({ status: 'error', message: e?.message ?? 'Could not get location' });
       }
     })();
-  }, []);
+  }, [isAuthenticated]);
 
   return state;
 };

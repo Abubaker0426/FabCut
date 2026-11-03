@@ -1,14 +1,14 @@
 import { FlatList, Modal, Pressable, Text, View } from 'react-native';
 import type { LocationPickerModalProps } from '@/types/LocationPickerModal';
 
-export function LocationPickerModal({ visible, locations, onSelect, onDismiss, }: LocationPickerModalProps) {
+export function LocationPickerModal({
+  visible,
+  locations,
+  onSelect,
+  onDismiss,
+}: LocationPickerModalProps) {
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-      onRequestClose={onDismiss}
-    >
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onDismiss}>
       <Pressable className="flex-1 bg-black/40 justify-center px-6">
         <Pressable onPress={(e) => e.stopPropagation()}>
           <View
@@ -31,9 +31,7 @@ export function LocationPickerModal({ visible, locations, onSelect, onDismiss, }
                   className="flex-row items-center px-5 py-4 border-b border-gray-50 active:bg-lightBlue"
                 >
                   <View className="flex-1">
-                    <Text className="text-lg font-semibold text-gray-800 pl-2">
-                      {item}
-                    </Text>
+                    <Text className="text-lg font-semibold text-gray-800 pl-2">{item}</Text>
                   </View>
                 </Pressable>
               )}

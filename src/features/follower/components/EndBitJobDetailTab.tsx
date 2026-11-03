@@ -1,19 +1,31 @@
-import { Ionicons } from '@expo/vector-icons'
-import { useRouter } from 'expo-router'
-import { FlatList, Pressable, Text, View } from 'react-native'
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { FlatList, Pressable, Text, View } from 'react-native';
 
-import { SizeRow } from '@/components/ui/SizeRow'
-import type { EndBitJobDetailTabProps } from '@/types/EndBitJobDetailTab'
-import { BarcodeRow } from './BarcodeRow'
-
+import { SizeRow } from '@/components/ui/SizeRow';
+import type { EndBitJobDetailTabProps } from '@/types/EndBitJobDetailTab';
+import { BarcodeRow } from './BarcodeRow';
 
 export function EndBitJobDetailTab({
-  jobDetail, ocNumber, itemCode, itemDesc, assignedQty, cutQty, numOfPlies, actualPlies,
-  scannedBarcodes, validationStates = {}, onActualPliesChange, onValidate, onDelete, onReasonChange, refreshControl,
+  jobDetail,
+  ocNumber,
+  itemCode,
+  itemDesc,
+  assignedQty,
+  cutQty,
+  numOfPlies,
+  actualPlies,
+  scannedBarcodes,
+  validationStates = {},
+  onActualPliesChange,
+  onValidate,
+  onDelete,
+  onReasonChange,
+  refreshControl,
 }: EndBitJobDetailTabProps) {
-  const router = useRouter()
-  const sizes = jobDetail.ratioDetails.map((r) => r.size)
-  const quantities = jobDetail.ratioDetails.map((r) => Number(r.quantity) || 0)
+  const router = useRouter();
+  const sizes = jobDetail.ratioDetails.map((r) => r.size);
+  const quantities = jobDetail.ratioDetails.map((r) => Number(r.quantity) || 0);
 
   return (
     <View className="flex-1 bg-lightBlue">
@@ -57,10 +69,7 @@ export function EndBitJobDetailTab({
                 </Text>
 
                 {/* Description = itemCode - itemDesc (italic, grey, centered) */}
-                <Text
-                  className="text-center italic text-greyText mb-6"
-                  style={{ fontSize: 13 }}
-                >
+                <Text className="text-center italic text-greyText mb-6" style={{ fontSize: 13 }}>
                   {`${itemCode} - ${itemDesc}`}
                 </Text>
 
@@ -89,9 +98,7 @@ export function EndBitJobDetailTab({
         )}
 
         ListEmptyComponent={
-          <Text className="text-center text-gray-400 mt-8 mb-4">
-            No barcodes scanned yet
-          </Text>
+          <Text className="text-center text-gray-400 mt-8 mb-4">No barcodes scanned yet</Text>
         }
       />
 
@@ -114,7 +121,7 @@ export function EndBitJobDetailTab({
         </Pressable>
       </View>
     </View>
-  )
+  );
 }
 
 function StatRow({ label, value, pt }: { label: string; value: string; pt?: boolean }) {
@@ -123,5 +130,5 @@ function StatRow({ label, value, pt }: { label: string; value: string; pt?: bool
       <Text className="flex-1 text-base text-greyText">{label}</Text>
       <Text className="flex-1 text-base font-bold text-gray-900 text-right">{value}</Text>
     </View>
-  )
+  );
 }

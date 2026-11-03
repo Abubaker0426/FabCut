@@ -1,6 +1,15 @@
 import { useMutation } from '@tanstack/react-query';
-import { scanEndBitBarcode, validateEndBitActualPlies, removeEndBitBarcode, completeEndBitJob } from '@/lib/api';
-import type { EndBitJobRequest, ValidateActualPliesRequest, ScanBarcodeResponse } from '@/types/follower';
+import {
+  scanEndBitBarcode,
+  validateEndBitActualPlies,
+  removeEndBitBarcode,
+  completeEndBitJob,
+} from '@/lib/api';
+import type {
+  EndBitJobRequest,
+  ValidateActualPliesRequest,
+  ScanBarcodeResponse,
+} from '@/types/follower';
 
 export const useEndBitScanBarcode = () =>
   useMutation<
@@ -10,7 +19,9 @@ export const useEndBitScanBarcode = () =>
   >({
     mutationFn: async ({ jobId, barcode, partName, data }) => {
       console.log('[useEndBitScanBarcode] 📡 POST /end-bits/jobs/{jobId}/barcodes/{barcode}', {
-        jobId, barcode, partName,
+        jobId,
+        barcode,
+        partName,
       });
       try {
         const res = await scanEndBitBarcode(jobId, barcode, partName, data);
@@ -21,28 +32,29 @@ export const useEndBitScanBarcode = () =>
           '[useEndBitScanBarcode] ❌ Failed:',
           err?.response?.status,
           err?.response?.data ?? err?.message,
-            
         );
         throw err;
       }
     },
   });
 
-
-
-
-
-
-
 export const useEndBitValidatePlies = () =>
   useMutation<
     boolean,
     Error,
-    { jobId: string; barcode: string; partName: string; data: ValidateActualPliesRequest & { deviceId: string; location: string } }
+    {
+      jobId: string;
+      barcode: string;
+      partName: string;
+      data: ValidateActualPliesRequest & { deviceId: string; location: string };
+    }
   >({
     mutationFn: async ({ jobId, barcode, partName, data }) => {
       console.log('[useEndBitValidatePlies] 📡 PUT /end-bits/jobs/{jobId}/barcodes/{barcode}', {
-        jobId, barcode, partName, data,
+        jobId,
+        barcode,
+        partName,
+        data,
       });
       try {
         const res = await validateEndBitActualPlies(jobId, barcode, partName, data);
@@ -59,20 +71,17 @@ export const useEndBitValidatePlies = () =>
     },
   });
 
-
-
-
-
-
-
-
 export const useEndBitDeleteBarcode = () =>
-  useMutation< boolean,Error,
+  useMutation<
+    boolean,
+    Error,
     { jobId: string; barcode: string; partName: string; data: EndBitJobRequest }
   >({
     mutationFn: async ({ jobId, barcode, partName, data }) => {
       console.log('[useEndBitDeleteBarcode] 📡 DELETE /end-bits/jobs/{jobId}/barcodes/{barcode}', {
-        jobId, barcode, partName,
+        jobId,
+        barcode,
+        partName,
       });
       try {
         const res = await removeEndBitBarcode(jobId, barcode, partName, data);
@@ -88,10 +97,6 @@ export const useEndBitDeleteBarcode = () =>
       }
     },
   });
-
-
-
-
 
 export const useCompleteEndBitJob = () =>
   useMutation<boolean, Error, { jobId: string; data: EndBitJobRequest }>({

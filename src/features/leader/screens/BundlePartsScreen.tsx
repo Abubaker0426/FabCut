@@ -15,12 +15,12 @@ import { useFetchPartsForOC } from '../hooks/useFetchPartsForOC';
 import { useUpdateBundleParts } from '../hooks/useUpdateBundleParts';
 
 export default function BundlePartsScreen() {
-  const router   = useRouter();
+  const router = useRouter();
   const location = useAppStore((s) => s.location);
 
-  const [ocNumber, setOcNumber]         = useState('');
-  const [parts, setParts]               = useState<FetchPartsDetails[]>([]);
-  const [submittedOc, setSubmittedOc]   = useState(''); // the OC that was actually queried
+  const [ocNumber, setOcNumber] = useState('');
+  const [parts, setParts] = useState<FetchPartsDetails[]>([]);
+  const [submittedOc, setSubmittedOc] = useState(''); // the OC that was actually queried
 
   // ── Hook: fetch parts on OC blur ──────────────────────────────────────────
 
@@ -34,7 +34,6 @@ export default function BundlePartsScreen() {
   } = useFetchPartsForOC(submittedOc, location, !!submittedOc);
 
   // Sync API response into local parts state so toggles work locally
-  // Mirrors Java: updateRecyclerView(parts) — sets adapter data once on fetch
   useEffect(() => {
     if (partsData?.parts) {
       setParts(partsData.parts.map((p) => ({ ...p })));
@@ -42,27 +41,24 @@ export default function BundlePartsScreen() {
   }, [partsData]);
 
   // ── Hook: save parts on Submit ────────────────────────────────────────────
-  // Mirrors Java: BundlePartsPresenter.submitParts(ocNo, parts)
-  //   → doPutSelectedBundleParts(ocNo, request)
-  //   success → finish()
   const { mutate: saveParts, isPending: isSaving } = useUpdateBundleParts();
 
   // ── OC blur handler ────────────────────────────────────────────────────────
-  // Mirrors Java: onFocusChange(hasFocus=false) → validateOcNumberAndGetParts(ocNo)
   const handleOcBlur = () => {
     const oc = ocNumber.trim();
     if (!oc) {
-      // Mirrors Java: TextUtils.isEmpty → show red X + error
       toast.error('Please enter an OC number.', 'Error');
       return;
     }
     setParts([]);
-    setSubmittedOc(oc);  // triggers the query with the exact OC typed
+    setSubmittedOc(oc); // triggers the query with the exact OC typed
   };
 
   const togglePart = (id: number) =>
     setParts((prev) =>
-      prev.map((p) => (p.partsUnique === id ? { ...p, isSelected: p.isSelected === 1 ? 0 : 1 } : p)),
+      prev.map((p) =>
+        p.partsUnique === id ? { ...p, isSelected: p.isSelected === 1 ? 0 : 1 } : p,
+      ),
     );
 
   // ── Submit ─────────────────────────────────────────────────────────────────
@@ -79,7 +75,7 @@ export default function BundlePartsScreen() {
       {
         onSuccess: () => {
           toast.success('Parts saved successfully.');
-          router.back();  // mirrors Java: finish()
+          router.back(); // mirrors Java: finish()
         },
         onError: (err: any) => {
           toast.apiError(err, 'Save Failed');
@@ -89,13 +85,7 @@ export default function BundlePartsScreen() {
   };
 
   // Green tick = success, Red X = error (mirrors Java validateIcon)
-  const ocValid = submittedOc
-    ? isFetchSuccess
-      ? true
-      : isFetchError
-        ? false
-        : null
-    : null;
+  const ocValid = submittedOc ? (isFetchSuccess ? true : isFetchError ? false : null) : null;
 
   return (
     <SafeAreaView className="flex-1 bg-lightBlue" edges={['top']}>
@@ -104,7 +94,6 @@ export default function BundlePartsScreen() {
       <CustomHeader title="Bundle Parts" onBack={() => router.back()} />
 
       <View className="flex-1">
-
         {/* ── OC# input row ─────────────────────────────────────────── */}
         <View
           className="flex-row items-center px-2.5"
@@ -126,7 +115,15 @@ export default function BundlePartsScreen() {
             />
           </View>
 
-          <View style={{ width: 50, height: 50, alignItems: 'center', justifyContent: 'center', padding: 8 }}>
+          <View
+            style={{
+              width: 50,
+              height: 50,
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: 8,
+            }}
+          >
             {ocValid !== null && (
               <Ionicons
                 name={ocValid ? 'checkmark-circle' : 'close-circle'}
@@ -161,7 +158,6 @@ export default function BundlePartsScreen() {
               <RefreshControl
                 refreshing={isRefetching}
                 onRefresh={() => {
-                  // Mirrors Java: refreshRecycleView → validateOcNumberAndGetParts(ocNumber)
                   if (submittedOc) refetch();
                 }}
               />
@@ -191,7 +187,6 @@ export default function BundlePartsScreen() {
             </Pressable>
           </View>
         )}
-
       </View>
     </SafeAreaView>
   );
@@ -229,9 +224,7 @@ function PartRow({ part, onToggle }: { part: FetchPartsDetails; onToggle: () => 
             justifyContent: 'center',
           }}
         >
-          {part.isSelected === 1 && (
-            <Ionicons name="checkmark" size={13} color="#fff" />
-          )}
+          {part.isSelected === 1 && <Ionicons name="checkmark" size={13} color="#fff" />}
         </View>
       </View>
     </Pressable>

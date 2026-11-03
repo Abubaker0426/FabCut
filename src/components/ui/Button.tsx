@@ -1,5 +1,5 @@
 import React from 'react';
-import {  ActivityIndicator,  Pressable,  Text,  type PressableProps,} from 'react-native';
+import { ActivityIndicator, Pressable, Text, type PressableProps } from 'react-native';
 interface ButtonProps extends PressableProps {
   title: string;
   variant?: 'primary' | 'outline' | 'ghost' | 'danger';
@@ -21,15 +21,22 @@ const textStyles = {
   danger: 'text-white font-semibold text-base',
 };
 
-export function Button({ title, variant = 'primary', loading = false,
-  disabled, className = '', ...props }: ButtonProps) {
+export function Button({
+  title,
+  variant = 'primary',
+  loading = false,
+  disabled,
+  className = '',
+  ...props
+}: ButtonProps) {
   const isDisabled = disabled || loading;
 
   return (
     <Pressable
       className={`px-6 py-3 items-center justify-center flex-row 
       ${variantStyles[variant]} ${isDisabled ? 'opacity-50' : ''} ${className}`}
-      disabled={isDisabled} {...props}
+      disabled={isDisabled}
+      {...props}
     >
       {loading && (
         <ActivityIndicator

@@ -1,11 +1,7 @@
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { fetchFitTypes } from '@/lib/api';
 
-export const useValidateOc = (
-  ocNo: string,
-  location: string | null,
-  triggered: boolean,
-) =>
+export const useValidateOc = (ocNo: string, location: string | null, triggered: boolean) =>
   useQuery<string[]>({
     queryKey: ['fitTypes', ocNo, location],
     queryFn: async () => {
@@ -23,8 +19,8 @@ export const useValidateOc = (
         throw err;
       }
     },
-    enabled:          triggered && ocNo.trim().length > 0 && !!location,
-    retry:            false,
-    staleTime:        30_000,        // cache result for 30s — same OC doesn't re-fetch
-    placeholderData:  keepPreviousData, // isSuccess stays true while re-fetching
+    enabled: triggered && ocNo.trim().length > 0 && !!location,
+    retry: false,
+    staleTime: 30_000, // cache result for 30s — same OC doesn't re-fetch
+    placeholderData: keepPreviousData, // isSuccess stays true while re-fetching
   });

@@ -1,6 +1,5 @@
 import type { Item, RatioDetail } from './common';
 
-
 export interface OcItemCode {
   itemCode: string;
   itemDesc: string;
@@ -67,7 +66,7 @@ export interface JobDetailsResponse {
   itemDesc: string;
   custName: string;
   styleNo: string;
-  sizeQtys: SizeQuantity[];    // Java @SerializedName("sizeQtys")
+  sizeQtys: SizeQuantity[]; // Java @SerializedName("sizeQtys")
   layLengths: LayLength[];
 }
 
@@ -75,7 +74,7 @@ export interface JobDetailsResponse {
 
 export interface Follower {
   deviceId: string;
-  status: 'Idle' | 'Busy';   // Java Status enum: @SerializedName("Idle") / @SerializedName("Busy")
+  status: 'Idle' | 'Busy'; // Java Status enum: @SerializedName("Idle") / @SerializedName("Busy")
   tableNumber: number;
 }
 
@@ -85,6 +84,8 @@ export interface OcLayDetail {
   size: string;
   quantity: number;
   completedQty: number;
+  ratio: number;
+  itemCode?: string; // from API — needed for SizeDetail in barcode generation
   itemDesc?: string;
 }
 
@@ -170,9 +171,9 @@ export interface AssignEndBitJobRequest {
 // ─── Bundle Parts ─────────────────────────────────────────────────────────────
 
 export interface FetchPartsDetails {
-  partsUnique: number;   // Java: Long
-  part: string;          // Java: @SerializedName("part")
-  isSelected: number;    // Java: int 0 or 1 — NOT boolean
+  partsUnique: number; // Java: Long
+  part: string; // Java: @SerializedName("part")
+  isSelected: number; // Java: int 0 or 1 — NOT boolean
 }
 
 export interface FetchPartsResponse {

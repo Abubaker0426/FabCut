@@ -1,15 +1,10 @@
-import type { BundleDetail } from './leader';
-import type { PrintJob } from './print';
+import type { BundleDetail, OcLay } from './leader';
 
 export interface EditBundleModalProps {
   visible: boolean;
-  ocNumber: string;
-  jobId: string;
-  totalQuantity: number;
+  job: OcLay | null; // full job info — needed for barcode generation
   onDismiss: () => void;
-  onSubmit: (rows: BundleDetail[]) => void;
-  /** When provided the modal will print barcodes on submit */
-  printJob?: PrintJob;
+  onSubmit: () => void; // called after successful print
 }
 
 export interface BundleRowProps {

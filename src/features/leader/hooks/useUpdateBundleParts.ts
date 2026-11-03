@@ -3,11 +3,7 @@ import { updateSelectedBundleParts } from '@/lib/api';
 import type { FetchPartsDetails } from '@/types/leader';
 
 export const useUpdateBundleParts = () =>
-  useMutation<
-    boolean,
-    Error,
-    { ocNo: string; parts: FetchPartsDetails[] }
-  >({
+  useMutation<boolean, Error, { ocNo: string; parts: FetchPartsDetails[] }>({
     mutationFn: async ({ ocNo, parts }) => {
       console.log('[useUpdateBundleParts] 📡 PUT /parts/{ocNo}', {
         ocNo,

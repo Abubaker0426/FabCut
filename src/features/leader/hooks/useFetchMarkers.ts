@@ -2,13 +2,8 @@ import { useMutation } from '@tanstack/react-query';
 import { fetchMarkers } from '@/lib/api';
 import type { MarkerResponse } from '@/types/leader';
 
-
 export const useFetchMarkers = () =>
-  useMutation<
-    MarkerResponse[],
-    Error,
-    { ocNo: string; location: string; fitType: string }
-  >({
+  useMutation<MarkerResponse[], Error, { ocNo: string; location: string; fitType: string }>({
     mutationFn: async ({ ocNo, location, fitType }) => {
       console.log('[useFetchMarkers] 📡 GET /ratios/markers/{ocNo}', { ocNo, location, fitType });
       try {

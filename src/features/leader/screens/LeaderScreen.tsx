@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { FlatList, Text, View } from 'react-native';import { SafeAreaView } from 'react-native-safe-area-context';
+import { FlatList, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import CustomDropdown from '@/components/Common/CustomDropdown';
 import CustomHeader from '@/components/Common/CustomHeader';
@@ -23,22 +24,21 @@ import { useUnregister } from '@/features/auth/hooks/useUnregister';
 type Step = 'form' | 'markers';
 
 export default function LeaderScreen() {
-  const router   = useRouter();
+  const router = useRouter();
   const location = useAppStore((s) => s.location);
 
   // ── Hook: unregister — shared hook handles deviceId, dialog, API, navigation
   const { handleUnregister, isUnregistering } = useUnregister();
 
   // ── UI state ────────────────────────────────────────────────────────────────
-  const [step, setStep]                 = useState<Step>('form');
-  const [ocNumber, setOcNumber]         = useState('');
-  const [ocTriggered, setOcTriggered]   = useState(false); // true only after input blur
-  const [fitType, setFitType]           = useState('');
-  const [markers, setMarkers]           = useState<Marker[]>([]);
-  const [sheetOpen, setSheetOpen]             = useState(false);
-  const [bundleVisible, setBundleVisible]     = useState(false);
-  const [selectedJob, setSelectedJob]         = useState<OcLay | null>(null);
-
+  const [step, setStep] = useState<Step>('form');
+  const [ocNumber, setOcNumber] = useState('');
+  const [ocTriggered, setOcTriggered] = useState(false); // true only after input blur
+  const [fitType, setFitType] = useState('');
+  const [markers, setMarkers] = useState<Marker[]>([]);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [bundleVisible, setBundleVisible] = useState(false);
+  const [selectedJob, setSelectedJob] = useState<OcLay | null>(null);
 
   const {
     data: fitTypes,
@@ -63,10 +63,7 @@ export default function LeaderScreen() {
   }, [ocNumber, isOcInvalid]);
 
   // ── Hook: fetch markers on Submit ───────────────────────────────────────────
-  const {
-    mutate: fetchMarkersMutate,
-    isPending: isFetchingMarkers,
-  } = useFetchMarkers();
+  const { mutate: fetchMarkersMutate, isPending: isFetchingMarkers } = useFetchMarkers();
 
   // ── Submit handler ──────────────────────────────────────────────────────────
   const handleSubmit = () => {
@@ -79,7 +76,7 @@ export default function LeaderScreen() {
       toast.info('Validating OC number, please wait...');
       return;
     }
-    if (!isOcValid) {
+    if (isOcInvalid) {
       toast.apiError(ocError, 'Invalid OC', 'Please enter a valid OC number.');
       return;
     }
@@ -97,7 +94,7 @@ export default function LeaderScreen() {
             return;
           }
           // Map MarkerResponse → Marker (attach ocNo, parse shrinkage to number)
-          // Mirrors Java: new MarkerItem(marker.getMarkerUnique(), marker.getShrinkage(), marker.getItems(), ocNo)
+          // new MarkerItem(marker.getMarkerUnique(), marker.getShrinkage(), marker.getItems(), ocNo)
           const mapped: Marker[] = data.map((m) => ({
             markerUnique: m.markerUnique,
             shrinkage: parseFloat(m.shrinkage) || 0,
@@ -122,7 +119,6 @@ export default function LeaderScreen() {
 
   const handleMarkerPress = (marker: Marker) => {
     // Store in Zustand instead of URL params — Expo Router corrupts long strings
-    // with special characters (underscores, slashes) in markerUnique
     useAppStore.getState().setSelectedMarker(marker as any);
     router.push('/leader/jobs');
   };
@@ -141,7 +137,7 @@ export default function LeaderScreen() {
         ]}
         overflowMenu={[
           { label: 'Select Bundle Parts', onPress: () => router.push('/leader/bundle-parts') },
-          { label: 'Unregister',          onPress: handleUnregister },
+          { label: 'Unregister', onPress: handleUnregister },
         ]}
       />
 
@@ -161,11 +157,15 @@ export default function LeaderScreen() {
           setFitType={setFitType}
           fitTypes={fitTypes ?? []}
           ocValid={
-            !ocNumber.trim()  ? null :
-            isValidatingOc    ? null :   // still loading — show neither tick nor cross
-            isOcValid         ? true :
-            isOcInvalid       ? false :
-            null
+            !ocNumber.trim()
+              ? null
+              : isValidatingOc
+                ? null // still loading — show neither tick nor cross
+                : isOcValid
+                  ? true
+                  : isOcInvalid
+                    ? false
+                    : null
           }
           onSubmit={handleSubmit}
         />
@@ -193,13 +193,14 @@ export default function LeaderScreen() {
       {/* Bundle split modal */}
       <EditBundleModal
         visible={bundleVisible}
-        ocNumber={selectedJob?.ocNo ?? ''}
-        jobId={selectedJob?.jobId ?? ''}
-        totalQuantity={100}
-        onDismiss={() => { setBundleVisible(false); setSelectedJob(null); }}
-        onSubmit={(rows) => {
+        job={selectedJob}
+        onDismiss={() => {
           setBundleVisible(false);
-          console.log('Bundle split:', rows);
+          setSelectedJob(null);
+        }}
+        onSubmit={() => {
+          setBundleVisible(false);
+          setSelectedJob(null);
         }}
       />
     </SafeAreaView>
@@ -208,11 +209,22 @@ export default function LeaderScreen() {
 
 // ── OC Form ───────────────────────────────────────────────────────────────────
 
-function OcForm({ ocNumber, setOcNumber, onOcBlur, fitType, setFitType, fitTypes, ocValid, onSubmit }: OcFormProps) {
+function OcForm({
+  ocNumber,
+  setOcNumber,
+  onOcBlur,
+  fitType,
+  setFitType,
+  fitTypes,
+  ocValid,
+  onSubmit,
+}: OcFormProps) {
   const validationIcon =
-    ocValid === true  ? <Ionicons name="checkmark-circle" size={22} color="#16a34a" /> :
-    ocValid === false ? <Ionicons name="close-circle"     size={22} color="#dc2626" /> :
-    null;
+    ocValid === true ? (
+      <Ionicons name="checkmark-circle" size={22} color="#16a34a" />
+    ) : ocValid === false ? (
+      <Ionicons name="close-circle" size={22} color="#dc2626" />
+    ) : null;
 
   return (
     <View className="flex-1 justify-center px-8">
@@ -280,7 +292,9 @@ function MarkerList({ markers, ocNumber, fitType, onPress, onBack }: MarkerListP
         />
         <View>
           <Text className="text-lg font-bold text-primary">Select Marker</Text>
-          <Text className="text-xs text-gray-500">{ocNumber} · {fitType}</Text>
+          <Text className="text-xs text-gray-500">
+            {ocNumber} · {fitType}
+          </Text>
         </View>
       </View>
 
@@ -288,9 +302,7 @@ function MarkerList({ markers, ocNumber, fitType, onPress, onBack }: MarkerListP
         data={markers}
         keyExtractor={(item) => item.markerUnique}
         contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
-        renderItem={({ item }) => (
-          <MarkerCard marker={item} onPress={() => onPress(item)} />
-        )}
+        renderItem={({ item }) => <MarkerCard marker={item} onPress={() => onPress(item)} />}
         ListEmptyComponent={
           <View className="items-center mt-20">
             <Text className="text-gray-400">No markers found.</Text>

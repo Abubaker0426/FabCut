@@ -9,11 +9,7 @@ export const useFetchJobDetails = (markerUnique: string) =>
       console.log('[useFetchJobDetails] 📡 GET /ratios/{marker}', { markerUnique });
       try {
         const res = await fetchJobDetails(markerUnique);
-        console.log(
-          '[useFetchJobDetails] ✅ Ratios received:',
-          res.data.ratios?.length,
-          'rows',
-        );
+        console.log('[useFetchJobDetails] ✅ Ratios received:', res.data.ratios?.length, 'rows');
         return res.data;
       } catch (err: any) {
         console.error(
@@ -25,6 +21,6 @@ export const useFetchJobDetails = (markerUnique: string) =>
       }
     },
     enabled: !!markerUnique,
-    staleTime: 0,   // always re-fetch when marker changes
+    staleTime: 0, // always re-fetch when marker changes
     retry: false,
   });

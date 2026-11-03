@@ -1,10 +1,16 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { Modal, Pressable, Text, TouchableOpacity, View } from 'react-native';
-import {  CustomHeaderProps} from '@/types/customHeader'
+import { CustomHeaderProps } from '@/types/customHeader';
 
-export default function CustomHeader({ title, onBack, onLogout, badge,
-  rightActions = [], overflowMenu = [], }: CustomHeaderProps) {
+export default function CustomHeader({
+  title,
+  onBack,
+  onLogout,
+  badge,
+  rightActions = [],
+  overflowMenu = [],
+}: CustomHeaderProps) {
   const [menuVisible, setMenuVisible] = useState(false);
 
   return (
@@ -26,7 +32,6 @@ export default function CustomHeader({ title, onBack, onLogout, badge,
 
       {/* Right side */}
       <View className="flex-row items-center gap-4">
-
         {badge ? (
           <View className="bg-amber-400 rounded-full px-3 py-0.5">
             <Text className="text-xs font-bold text-white">{badge}</Text>
@@ -84,7 +89,10 @@ export default function CustomHeader({ title, onBack, onLogout, badge,
                   {overflowMenu.map((item, i) => (
                     <TouchableOpacity
                       key={i}
-                      onPress={() => { setMenuVisible(false); item.onPress(); }}
+                      onPress={() => {
+                        setMenuVisible(false);
+                        item.onPress();
+                      }}
                       style={{
                         paddingHorizontal: 16,
                         paddingVertical: 14,
@@ -106,7 +114,6 @@ export default function CustomHeader({ title, onBack, onLogout, badge,
             <Ionicons name="log-out-outline" size={22} color="#fff" />
           </Pressable>
         ) : null}
-
       </View>
     </View>
   );

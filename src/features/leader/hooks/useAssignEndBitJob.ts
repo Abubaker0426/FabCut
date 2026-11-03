@@ -3,11 +3,7 @@ import { assignEndBitJobToFollower } from '@/lib/api';
 import type { AssignEndBitJobRequest } from '@/types/leader';
 
 export const useAssignEndBitJob = () =>
-  useMutation<
-    boolean,
-    Error,
-    { deviceId: string; data: AssignEndBitJobRequest }
-  >({
+  useMutation<boolean, Error, { deviceId: string; data: AssignEndBitJobRequest }>({
     mutationFn: async ({ deviceId, data }) => {
       console.log('[useAssignEndBitJob] 📡 POST /end-bits/jobs/{deviceId}', { deviceId, data });
       try {

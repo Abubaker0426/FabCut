@@ -1,28 +1,33 @@
-import { Ionicons } from '@expo/vector-icons'
-import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native'
-import { useState } from 'react'
-import CustomDropdown from '@/components/Common/CustomDropdown'
-import type { BarcodeRowProps, ValidationState } from '@/types/BarcodeRow'
+import { Ionicons } from '@expo/vector-icons';
+import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native';
+import { useState } from 'react';
+import CustomDropdown from '@/components/Common/CustomDropdown';
+import type { BarcodeRowProps } from '@/types/BarcodeRow';
 
-const REASON_OPTIONS = ['Reason', 'Excess', 'Shortage']
+const REASON_OPTIONS = ['Reason', 'Excess', 'Shortage'];
 
 export function BarcodeRow({
-  item, validationState = item.validated ? 'valid' : 'idle',
-  onActualPliesChange, onValidate, onDelete, onReasonChange,
+  item,
+  validationState = item.validated ? 'valid' : 'idle',
+  onActualPliesChange,
+  onValidate,
+  onDelete,
+  onReasonChange,
+  onNoOfLaysChange,
+  onEndbitsChange,
 }: BarcodeRowProps) {
-
-  const [reason, setReason] = useState('Reason')
+  const [reason, setReason] = useState('Reason');
 
   const handleReasonSelect = (selected: string) => {
-    setReason(selected)
-    onReasonChange?.(item.barcode, selected)
-  }
+    setReason(selected);
+    onReasonChange?.(item.barcode, selected);
+  };
 
   const handlePliesBlur = () => {
     if (item.actualPlies > 0) {
-      onValidate?.(item.barcode, item.actualPlies)
+      onValidate?.(item.barcode, item.actualPlies);
     }
-  }
+  };
 
   return (
     <View
@@ -36,23 +41,15 @@ export function BarcodeRow({
       }}
     >
       <View className="p-4">
-
         {/* ── Barcode string ─────────────────────────────────────────── */}
-        <Text className="text-base font-bold text-gray-900 mb-5">
-          {item.barcode}
-        </Text>
-
+        <Text className="text-base font-bold text-gray-900 mb-5"> {item.barcode}</Text>
         {/* ── Expected Plies | Actual Plies row ──────────────────────── */}
         <View className="flex-row items-start mb-5">
-
           {/* Expected plies — read-only, left column */}
           <View className="flex-1">
             <Text className="text-xs text-gray-500 mb-2">Expected Plies</Text>
-            <Text className="text-sm font-bold text-gray-900">
-              {item.expectedPlies}
-            </Text>
+            <Text className="text-sm font-bold text-gray-900">{item.expectedPlies}</Text>
           </View>
-
           {/* Actual plies — editable input + validation icon, right column */}
           <View className="flex-row items-center gap-3">
             <View>
@@ -69,12 +66,8 @@ export function BarcodeRow({
                 style={{ minWidth: 80 }}
               />
             </View>
-
             {/* Feedback icon — mirrors feedback_icon + loader in XML */}
-            <View
-              className="w-6 h-6 items-center justify-center"
-              style={{ marginTop: 20 }}
-            >
+            <View className="w-6 h-6 items-center justify-center" style={{ marginTop: 20 }}>
               {validationState === 'validating' && (
                 <ActivityIndicator size="small" color="#21226b" />
               )}
@@ -88,10 +81,39 @@ export function BarcodeRow({
             </View>
           </View>
         </View>
-
+        {/* ── No of Lays | Endbits row ───────────────────────────────── */}
+        <View className="flex-row items-start mb-5 gap-3">
+          {/* No of Lays — editable input, left column */}
+          <View className="flex-1">
+            <Text className="text-xs text-gray-500 mb-2">No of Lays</Text>
+            <TextInput
+              className="border border-gray-300 rounded-lg px-3 py-2 text-sm font-bold text-gray-900"
+              keyboardType="decimal-pad"
+              value={
+                'noOfLays' in item && typeof item.noOfLays === 'number' && item.noOfLays > 0
+                  ? String(item.noOfLays)
+                  : ''
+              }
+              onChangeText={(v) => onNoOfLaysChange?.(item.barcode, v)}
+              placeholder="0"
+              placeholderTextColor="#aaa"
+            />
+          </View>
+          {/* Endbits — editable input, right column */}
+          <View className="flex-1">
+            <Text className="text-xs text-gray-500 mb-2">Endbits</Text>
+            <TextInput
+              className="border border-gray-300 rounded-lg px-3 py-2 text-sm font-bold text-gray-900"
+              keyboardType="decimal-pad"
+              value={item.endbits && item.endbits > 0 ? String(item.endbits) : ''}
+              onChangeText={(v) => onEndbitsChange?.(item.barcode, v)}
+              placeholder="0"
+              placeholderTextColor="#aaa"
+            />
+          </View>
+        </View>
         {/* ── Reason dropdown + Delete row ───────────────────────────── */}
         <View className="flex-row items-center gap-3">
-
           {/* Reason spinner — mirrors @drawable/circular_corners, width ~250dp */}
           <View style={{ flex: 1, maxWidth: 260 }}>
             <CustomDropdown
@@ -101,7 +123,6 @@ export function BarcodeRow({
               onSelect={handleReasonSelect}
             />
           </View>
-
           {/* Delete icon — mirrors ic_delete */}
           <Pressable
             onPress={() => onDelete?.(item.barcode)}
@@ -113,8 +134,7 @@ export function BarcodeRow({
             <Ionicons name="trash-outline" size={22} color="#dc2626" />
           </Pressable>
         </View>
-
       </View>
     </View>
-  )
+  );
 }

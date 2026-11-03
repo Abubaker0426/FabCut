@@ -2,7 +2,6 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchFollowers } from '@/lib/api';
 import type { Follower } from '@/types/leader';
 
-
 export const useFetchFollowers = (location: string | null, enabled: boolean) =>
   useQuery<Follower[]>({
     queryKey: ['followers', location],
@@ -11,7 +10,10 @@ export const useFetchFollowers = (location: string | null, enabled: boolean) =>
       try {
         const res = await fetchFollowers(location!);
         console.log('[useFetchFollowers] ✅ Followers:', res.data.length);
-        console.log('[useFetchFollowers] 📋 Raw statuses:', res.data.map(f => `Table ${f.tableNumber}: "${f.status}"`));
+        console.log(
+          '[useFetchFollowers] 📋 Raw statuses:',
+          res.data.map((f) => `Table ${f.tableNumber}: "${f.status}"`),
+        );
         return res.data;
       } catch (err: any) {
         console.error(
@@ -23,6 +25,6 @@ export const useFetchFollowers = (location: string | null, enabled: boolean) =>
       }
     },
     enabled: !!location && enabled,
-    staleTime: 0,   // always re-fetch when sheet opens
+    staleTime: 0, // always re-fetch when sheet opens
     retry: false,
   });

@@ -1,10 +1,10 @@
-
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
     "moduleResolution": "bundler",
     "skipLibCheck": true,
+    "types": ["jest"],
     "paths": {
       "@/*": [
         "./src/*"

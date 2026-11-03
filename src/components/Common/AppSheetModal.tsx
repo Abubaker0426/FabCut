@@ -1,18 +1,27 @@
-import { forwardRef, useCallback, useMemo, } from "react";
-import { View, Text } from "react-native";
-import BottomSheet, { BottomSheetBackdrop, BottomSheetFlatList, BottomSheetScrollView, } from "@gorhom/bottom-sheet";
+import { forwardRef, useCallback, useMemo } from 'react';
+import { View, Text } from 'react-native';
+import BottomSheet, {
+  BottomSheetBackdrop,
+  BottomSheetFlatList,
+  BottomSheetScrollView,
+} from '@gorhom/bottom-sheet';
 import type { AppSheetModalProps } from '@/types/AppSheetModal';
 
 const AppSheetModal = forwardRef<BottomSheet, AppSheetModalProps>(
-  ({
-    title, badge, snapPoints: snapPointsProp, initialIndex = -1,
-    showBackdrop = true, onClose, scrollable = true, children,
-  },
-    ref) => {
-    const snapPoints = useMemo(
-      () => snapPointsProp ?? ["15%", "50%", "92%"],
-      [snapPointsProp]
-    );
+  (
+    {
+      title,
+      badge,
+      snapPoints: snapPointsProp,
+      initialIndex = -1,
+      showBackdrop = true,
+      onClose,
+      scrollable = true,
+      children,
+    },
+    ref,
+  ) => {
+    const snapPoints = useMemo(() => snapPointsProp ?? ['15%', '50%', '92%'], [snapPointsProp]);
 
     const renderBackdrop = useCallback(
       (props: any) =>
@@ -24,36 +33,29 @@ const AppSheetModal = forwardRef<BottomSheet, AppSheetModalProps>(
             pressBehavior="collapse"
           />
         ) : null,
-      [showBackdrop]
+      [showBackdrop],
     );
 
     const renderHandle = useCallback(
       () => (
         <View className="items-center pt-2 pb-2 px-4 border-b border-gray-200 bg-gray-100 rounded-t-3xl">
-
           {/* Handle Pill */}
           <View className="w-10 h-[5px] rounded-full bg-gray-300 mb-1" />
 
           <View className="flex-row items-center">
-
-            <Text
-              numberOfLines={1}
-              className="text-sm font-semibold text-gray-600"
-            >
+            <Text numberOfLines={1} className="text-sm font-semibold text-gray-600">
               {title}
             </Text>
 
             {badge !== undefined && badge > 0 && (
               <View className="ml-2 min-w-[22px] px-2 py-[2px] rounded-full bg-blue-500 items-center">
-                <Text className="text-white text-[12px] font-bold">
-                  {badge}
-                </Text>
+                <Text className="text-white text-[12px] font-bold">{badge}</Text>
               </View>
             )}
           </View>
         </View>
       ),
-      [title, badge]
+      [title, badge],
     );
 
     return (
@@ -68,14 +70,14 @@ const AppSheetModal = forwardRef<BottomSheet, AppSheetModalProps>(
         handleComponent={renderHandle}
         onClose={onClose}
         style={{
-          shadowColor: "#000",
+          shadowColor: '#000',
           shadowOffset: { width: 0, height: -3 },
           shadowOpacity: 0.1,
           shadowRadius: 3,
           elevation: 5,
         }}
         backgroundStyle={{
-          backgroundColor: "#fff",
+          backgroundColor: '#fff',
           borderTopLeftRadius: 20,
           borderTopRightRadius: 20,
         }}
@@ -91,15 +93,13 @@ const AppSheetModal = forwardRef<BottomSheet, AppSheetModalProps>(
             {children}
           </BottomSheetScrollView>
         ) : (
-          <View style={{ flex: 1 }}>
-            {children}
-          </View>
+          <View style={{ flex: 1 }}>{children}</View>
         )}
       </BottomSheet>
     );
-  }
+  },
 );
 
-AppSheetModal.displayName = "AppSheetModal";
+AppSheetModal.displayName = 'AppSheetModal';
 export { BottomSheetFlatList };
 export default AppSheetModal;

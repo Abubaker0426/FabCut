@@ -6,9 +6,12 @@ import { Dimensions, Pressable, StyleSheet, Text, Vibration, View } from 'react-
 import { SafeAreaView } from 'react-native-safe-area-context';
 const BEEP_SOUND = require('@/../assets/sound/beep.mp3');
 
-const ROI_WIDTH = 290;
-const ROI_HEIGHT = 290;
-const ROI_TOLERANCE = 0.15; // fraction of ROI size a barcode's center may fall outside and still count
+const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
+// 75% of the shorter side — scales up on tablets, stays reasonable on phones
+const ROI_SIZE = Math.round(Math.min(SCREEN_W, SCREEN_H) * 0.75);
+const ROI_WIDTH = ROI_SIZE;
+const ROI_HEIGHT = ROI_SIZE;
+const ROI_TOLERANCE = 0.15;
 
 export interface ScannerScreenProps {
   onScanned: (code: string) => void;
@@ -62,9 +65,11 @@ export default function ScannerScreen({
       Vibration.vibrate(200);
       // Play sound first, then return the code after a short delay
       // so the player isn't released mid-playback by navigation
-      setTimeout(() => { onScanned(result.data); }, 150);
+      setTimeout(() => {
+        onScanned(result.data);
+      }, 150);
     },
-    [onScanned, player]
+    [onScanned, player],
   );
   if (!permission) {
     return (

@@ -1,0 +1,23 @@
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+
+group = 'expo.modules.zebrausbprint'
+version = '1.0.0'
+
+android {
+  namespace "expo.modules.zebrausbprint"
+  defaultConfig {
+    versionCode 1
+    versionName "1.0.0"
+  }
+  lintOptions {
+    abortOnError false
+  }
+}
+
+dependencies {
+  // Same Zebra Link-OS SDK jar the native fabcut app uses
+  implementation files('libs/ZSDK_ANDROID_API.jar')
+}

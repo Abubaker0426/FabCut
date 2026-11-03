@@ -2,11 +2,6 @@ import { useMutation } from '@tanstack/react-query';
 import { unregisterDevice } from '@/lib/api';
 import type { UnregisterRequest } from '@/types/auth';
 
-/**
- * Calls DELETE /fabcut/cutting/registrations/{deviceId}
- * Body: { location, role }
- * Mirrors: MainPresenter#unregister
- */
 export const useUnregisterDevice = () =>
   useMutation<boolean, Error, { deviceId: string; data: UnregisterRequest }>({
     mutationFn: async ({ deviceId, data }) => {
@@ -15,7 +10,10 @@ export const useUnregisterDevice = () =>
         ...data,
         role: data.role.charAt(0) + data.role.slice(1).toLowerCase(), // "LEADER" → "Leader"
       };
-      console.log('[useUnregisterDevice] 📡 DELETE /registrations/{deviceId}', { deviceId, payload });
+      console.log('[useUnregisterDevice] 📡 DELETE /registrations/{deviceId}', {
+        deviceId,
+        payload,
+      });
       try {
         const res = await unregisterDevice(deviceId, payload as any);
         console.log('[useUnregisterDevice] ✅ Response:', res.data);

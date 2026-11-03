@@ -1,11 +1,13 @@
 import Toast from 'react-native-toast-message';
+
 export function getErrorMessage(err: any, fallback = 'Something went wrong.'): string {
-  return (
-    err?.response?.data?.message ||
-    err?.response?.data?.error   ||
-    err?.message                 ||
-    fallback
-  );
+  const data = err?.response?.data;
+  if (typeof data === 'string' && data.trim()) return data.trim();
+  if (typeof data?.message === 'string') return data.message;
+  if (typeof data?.error === 'string') return data.error;
+  if (typeof data?.errorMessage === 'string') return data.errorMessage;
+  if (typeof err?.message === 'string') return err.message;
+  return fallback;
 }
 
 export const toast = {

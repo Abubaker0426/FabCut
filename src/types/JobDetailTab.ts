@@ -15,5 +15,7 @@ export interface JobDetailTabProps {
   onValidate?: (barcode: string, actualPlies: number) => void;
   onDelete?: (barcode: string) => void;
   onReasonChange?: (barcode: string, reason: string) => void;
+  onNoOfLaysChange?: (barcode: string, value: string) => void;
+  onEndbitsChange?: (barcode: string, value: string) => void;
   refreshControl?: React.ReactElement<RefreshControlProps>;
 }

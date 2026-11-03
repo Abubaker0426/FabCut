@@ -1,5 +1,5 @@
-export type Role           = 'LEADER' | 'FOLLOWER';
-export type JobType        = 'NORMAL' | 'END_BIT';
+export type Role = 'LEADER' | 'FOLLOWER';
+export type JobType = 'NORMAL' | 'END_BIT';
 export type FollowerStatus = 'IDLE' | 'BUSY' | 'DONE';
 
 // ─── Shared item / ratio primitives ──────────────────────────────────────────

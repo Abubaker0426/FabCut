@@ -2,7 +2,6 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchAssignedJobs } from '@/lib/api';
 import type { JobListItem, OcLay, OcLayDetail } from '@/types/leader';
 
-
 export const useFetchAssignedJobs = (location: string | null, enabled: boolean) =>
   useQuery<OcLay[]>({
     queryKey: ['assignedJobs', location],
@@ -11,7 +10,26 @@ export const useFetchAssignedJobs = (location: string | null, enabled: boolean) 
       try {
         const res = await fetchAssignedJobs(location!);
         console.log('[useFetchAssignedJobs] ✅ Raw rows:', res.data.length);
-        return getUniqueOcLay(res.data);
+        console.log('[useFetchAssignedJobs] 📋 Raw data:', JSON.stringify(res.data, null, 2));
+
+        const grouped = getUniqueOcLay(res.data);
+        console.log('[useFetchAssignedJobs] 📦 Grouped OcLays:', grouped.length);
+        grouped.forEach((ocLay, i) => {
+          console.log(
+            `[useFetchAssignedJobs]   [${i}] jobId=${ocLay.jobId} ocNo=${ocLay.ocNo}` +
+              ` lay=${ocLay.lay} fitType=${ocLay.fitType} tableNum=${ocLay.tableNum}` +
+              ` details=${ocLay.details.length}`,
+          );
+          ocLay.details.forEach((d, j) => {
+            console.log(
+              `[useFetchAssignedJobs]     detail[${j}] size=${d.size}` +
+                ` qty=${d.quantity} ratio=${d.ratio}` +
+                ` itemCode=${d.itemCode ?? '—'} itemDesc=${d.itemDesc ?? '—'}`,
+            );
+          });
+        });
+
+        return grouped;
       } catch (err: any) {
         console.error(
           '[useFetchAssignedJobs] ❌ Failed:',
@@ -37,22 +55,25 @@ function getUniqueOcLay(rows: JobListItem[]): OcLay[] {
 
     if (!map.has(key)) {
       map.set(key, {
-        jobId:           String(row.jobId),
-        tableNum:        row.tableNum,
-        ocNo:            row.ocNo,
-        lay:             row.lay,
-        fitType:         row.fitType,
+        jobId: String(row.jobId),
+        tableNum: row.tableNum,
+        ocNo: row.ocNo,
+        lay: row.lay,
+        fitType: row.fitType,
         itemDescription: `${row.itemCode} - ${row.itemDesc}`,
-        details:         [],
+        details: [],
       });
     }
 
-    if (row.quantity > 0) {
+    const qty = Number(row.quantity); // server sends "41" as string — coerce to number
+    if (qty > 0) {
       const detail: OcLayDetail = {
-        size:        row.size,
-        quantity:    row.quantity,
+        size: row.size,
+        quantity: qty,
         completedQty: 0,
-        itemDesc:    row.itemDesc,
+        ratio: row.ratio,
+        itemCode: row.itemCode,
+        itemDesc: row.itemDesc,
       };
       map.get(key)!.details.push(detail);
     }

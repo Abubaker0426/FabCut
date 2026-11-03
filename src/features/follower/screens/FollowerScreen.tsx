@@ -1,11 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Alert, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import CustomHeader from '@/components/Common/CustomHeader';
 import { LoadingOverlay } from '@/components/ui/LoadingOverlay';
-import { getDeviceId } from '@/lib/deviceId';
+// import { getDeviceId } from '@/lib/deviceId';
 import { toast } from '@/lib/toast';
 import { useAppStore } from '@/store/appStore';
 import type {
@@ -36,38 +36,40 @@ export default function FollowerScreen() {
   const location = useAppStore((s) => s.location) ?? '';
   const lastScannedCode = useAppStore((s) => s.lastScannedCode);
 
-  const [activeTab, setActiveTab]           = useState(0);
-  const [barcodes, setBarcodes]             = useState<ScanBarcode[]>([]);
-  const [showRefresh, setShowRefresh]       = useState(false);
+  const [activeTab, setActiveTab] = useState(0);
+  const [barcodes, setBarcodes] = useState<ScanBarcode[]>([]);
+  const [showRefresh, setShowRefresh] = useState(false);
   const [validationStates, setValidationStates] = useState<ValidationMap>({});
 
   // ── Normal job hooks ───────────────────────────────────────────────────────
-  const { mutate: submitScan,        isPending: isScanning }   = useScanBarcode();
-  const { mutate: submitValidate }                              = useValidatePlies();
-  const { mutate: submitDelete }                                = useDeleteBarcode();
+  const { mutate: submitScan, isPending: isScanning } = useScanBarcode();
+  const { mutate: submitValidate } = useValidatePlies();
+  const { mutate: submitDelete } = useDeleteBarcode();
   const { mutate: submitCompleteJob, isPending: isCompleting } = useCompleteJob();
 
   // ── End-bit job hooks ──────────────────────────────────────────────────────
-  const { mutate: submitEndBitScan,     isPending: isEndBitScanning }   = useEndBitScanBarcode();
-  const { mutate: submitEndBitValidate }                                 = useEndBitValidatePlies();
-  const { mutate: submitEndBitDelete }                                   = useEndBitDeleteBarcode();
-  const { mutate: submitCompleteEndBit, isPending: isEndBitCompleting }  = useCompleteEndBitJob();
+  const { mutate: submitEndBitScan, isPending: isEndBitScanning } = useEndBitScanBarcode();
+  const { mutate: submitEndBitValidate } = useEndBitValidatePlies();
+  const { mutate: submitEndBitDelete } = useEndBitDeleteBarcode();
+  const { mutate: submitCompleteEndBit, isPending: isEndBitCompleting } = useCompleteEndBitJob();
 
-  const { handleUnregister } = useUnregister();
+  useUnregister();
 
   // ── Fetch job on mount + refetch on pull-to-refresh ────────────────────────
   const {
     data: jobResult,
-    isLoading:   isJobLoading,
+    isLoading: isJobLoading,
     isRefetching,
     refetch,
     error,
   } = useGetMyJob(deviceId, location);
 
   // ── Derived job state ──────────────────────────────────────────────────────
-  const jobType   = jobResult?.type ?? 'NONE';
-  const normalJob = jobResult?.type === 'NORMAL'  ? jobResult.data as FetchFollowerJobResponse  : null;
-  const endBitJob = jobResult?.type === 'END_BIT' ? jobResult.data as FetchFollowerEndBitJobResponse : null;
+  const jobType = jobResult?.type ?? 'NONE';
+  const normalJob =
+    jobResult?.type === 'NORMAL' ? (jobResult.data as FetchFollowerJobResponse) : null;
+  const endBitJob =
+    jobResult?.type === 'END_BIT' ? (jobResult.data as FetchFollowerEndBitJobResponse) : null;
 
   // ── Error toast ────────────────────────────────────────────────────────────
   React.useEffect(() => {
@@ -81,25 +83,26 @@ export default function FollowerScreen() {
     setValidationStates({});
   }, [jobResult]);
 
-  // ── Watch scanner result ───────────────────────────────────────────────────
-  // Fires when ScannerRoute stores a code and calls router.back()
-  React.useEffect(() => {
-    if (!lastScannedCode) return;
-    useAppStore.getState().setLastScannedCode(null);
-
-    if (normalJob) {
-      handleNormalScan(lastScannedCode);
-    } else if (endBitJob) {
-      handleEndBitScan(lastScannedCode);
-    }
-  }, [lastScannedCode]);
-
-  const onRefresh = () => { refetch(); };
+  const onRefresh = () => {
+    refetch();
+  };
 
   // ── Shared actual plies change ─────────────────────────────────────────────
   const handleActualPliesChange = (barcode: string, value: string) => {
     setBarcodes((prev) =>
-      prev.map((b) => b.barcode === barcode ? { ...b, actualPlies: Number(value) || 0 } : b),
+      prev.map((b) => (b.barcode === barcode ? { ...b, actualPlies: Number(value) || 0 } : b)),
+    );
+  };
+
+  const handleNoOfLaysChange = (barcode: string, value: string) => {
+    setBarcodes((prev) =>
+      prev.map((b) => (b.barcode === barcode ? { ...b, noOfLays: Number(value) || 0 } : b)),
+    );
+  };
+
+  const handleEndbitsChange = (barcode: string, value: string) => {
+    setBarcodes((prev) =>
+      prev.map((b) => (b.barcode === barcode ? { ...b, endbits: Number(value) || 0 } : b)),
     );
   };
 
@@ -116,14 +119,17 @@ export default function FollowerScreen() {
       { jobId: String(normalJob.jobId), barcode: scannedCode, itemCode: currentTab.itemCode },
       {
         onSuccess: (res) => {
-          setBarcodes((prev) => [...prev, {
-            jobId:         String(normalJob.jobId),
-            barcode:       scannedCode,
-            itemCode:      currentTab.itemCode,
-            expectedPlies: res.plies,
-            actualPlies:   0,
-            validated:     false,
-          }]);
+          setBarcodes((prev) => [
+            ...prev,
+            {
+              jobId: String(normalJob.jobId),
+              barcode: scannedCode,
+              itemCode: currentTab.itemCode,
+              expectedPlies: res.plies,
+              actualPlies: 0,
+              validated: false,
+            },
+          ]);
         },
         onError: (err: any) => toast.apiError(err, 'Scan Failed'),
       },
@@ -132,17 +138,30 @@ export default function FollowerScreen() {
 
   const handleNormalValidate = (barcode: string, actualPlies: number) => {
     if (!normalJob) return;
+    const barcodeItem = barcodes.find((b) => b.barcode === barcode);
     setValidationStates((prev) => ({ ...prev, [barcode]: 'validating' }));
     submitValidate(
-      { jobId: String(normalJob.jobId), barcode, data: { actualPlies } },
+      {
+        jobId: String(normalJob.jobId),
+        barcode,
+        data: {
+          actualPlies,
+          numberOfLays: barcodeItem?.noOfLays,
+          endBits: barcodeItem?.endbits,
+        },
+      },
       {
         onSuccess: () => {
           setValidationStates((prev) => ({ ...prev, [barcode]: 'valid' }));
-          setBarcodes((prev) => prev.map((b) => b.barcode === barcode ? { ...b, validated: true } : b));
+          setBarcodes((prev) =>
+            prev.map((b) => (b.barcode === barcode ? { ...b, validated: true } : b)),
+          );
         },
         onError: (err: any) => {
           setValidationStates((prev) => ({ ...prev, [barcode]: 'error' }));
-          setBarcodes((prev) => prev.map((b) => b.barcode === barcode ? { ...b, validated: false } : b));
+          setBarcodes((prev) =>
+            prev.map((b) => (b.barcode === barcode ? { ...b, validated: false } : b)),
+          );
           toast.apiError(err, 'Validation Failed');
         },
       },
@@ -156,7 +175,11 @@ export default function FollowerScreen() {
       {
         onSuccess: () => {
           setBarcodes((prev) => prev.filter((b) => b.barcode !== barcode));
-          setValidationStates((prev) => { const n = { ...prev }; delete n[barcode]; return n; });
+          setValidationStates((prev) => {
+            const n = { ...prev };
+            delete n[barcode];
+            return n;
+          });
         },
         onError: (err: any) => toast.apiError(err, 'Delete Failed'),
       },
@@ -175,26 +198,42 @@ export default function FollowerScreen() {
 
     submitEndBitScan(
       {
-        jobId:    String(endBitJob.endBitJobId),
-        barcode:  scannedCode,
+        jobId: String(endBitJob.endBitJobId),
+        barcode: scannedCode,
         partName: currentPartName,
-        data:     { deviceId, location },  // EndBitJobRequest
+        data: { deviceId, location }, // EndBitJobRequest
       },
       {
         onSuccess: (res) => {
-          setBarcodes((prev) => [...prev, {
-            jobId:         String(endBitJob.endBitJobId),
-            barcode:       scannedCode,
-            itemCode:      currentPartName,  // keyed by partName for end-bit
-            expectedPlies: res.plies,
-            actualPlies:   0,
-            validated:     false,
-          }]);
+          setBarcodes((prev) => [
+            ...prev,
+            {
+              jobId: String(endBitJob.endBitJobId),
+              barcode: scannedCode,
+              itemCode: currentPartName, // keyed by partName for end-bit
+              expectedPlies: res.plies,
+              actualPlies: 0,
+              validated: false,
+            },
+          ]);
         },
         onError: (err: any) => toast.apiError(err, 'Scan Failed'),
       },
     );
   };
+
+  // ── Watch scanner result ───────────────────────────────────────────────────
+  // Fires when ScannerRoute stores a code and calls router.back()
+  React.useEffect(() => {
+    if (!lastScannedCode) return;
+    useAppStore.getState().setLastScannedCode(null);
+
+    if (normalJob) {
+      handleNormalScan(lastScannedCode);
+    } else if (endBitJob) {
+      handleEndBitScan(lastScannedCode);
+    }
+  }, [lastScannedCode]);
 
   const handleEndBitValidate = (barcode: string, actualPlies: number) => {
     if (!endBitJob || !deviceId || !location) return;
@@ -202,19 +241,23 @@ export default function FollowerScreen() {
 
     submitEndBitValidate(
       {
-        jobId:    String(endBitJob.endBitJobId),
+        jobId: String(endBitJob.endBitJobId),
         barcode,
         partName: currentPartName,
-        data:     { actualPlies, deviceId, location },  // all 3 fields required for end-bit
+        data: { actualPlies, deviceId, location }, // all 3 fields required for end-bit
       },
       {
         onSuccess: () => {
           setValidationStates((prev) => ({ ...prev, [barcode]: 'valid' }));
-          setBarcodes((prev) => prev.map((b) => b.barcode === barcode ? { ...b, validated: true } : b));
+          setBarcodes((prev) =>
+            prev.map((b) => (b.barcode === barcode ? { ...b, validated: true } : b)),
+          );
         },
         onError: (err: any) => {
           setValidationStates((prev) => ({ ...prev, [barcode]: 'error' }));
-          setBarcodes((prev) => prev.map((b) => b.barcode === barcode ? { ...b, validated: false } : b));
+          setBarcodes((prev) =>
+            prev.map((b) => (b.barcode === barcode ? { ...b, validated: false } : b)),
+          );
           toast.apiError(err, 'Validation Failed');
         },
       },
@@ -225,15 +268,19 @@ export default function FollowerScreen() {
     if (!endBitJob || !deviceId || !location) return;
     submitEndBitDelete(
       {
-        jobId:    String(endBitJob.endBitJobId),
+        jobId: String(endBitJob.endBitJobId),
         barcode,
         partName: currentPartName,
-        data:     { deviceId, location },
+        data: { deviceId, location },
       },
       {
         onSuccess: () => {
           setBarcodes((prev) => prev.filter((b) => b.barcode !== barcode));
-          setValidationStates((prev) => { const n = { ...prev }; delete n[barcode]; return n; });
+          setValidationStates((prev) => {
+            const n = { ...prev };
+            delete n[barcode];
+            return n;
+          });
         },
         onError: (err: any) => toast.apiError(err, 'Delete Failed'),
       },
@@ -242,8 +289,6 @@ export default function FollowerScreen() {
 
   // ════════════════════════════════════════════════════════════════════════════
   // SUBMIT — handles both normal and end-bit
-  // Mirrors Java: FollowerPresenter.validatedAllPlies() → completeJob/completeEndBitJob
-  // ════════════════════════════════════════════════════════════════════════════
 
   const handleSubmit = () => {
     const unvalidated = barcodes.filter((b) => !b.validated);
@@ -251,8 +296,8 @@ export default function FollowerScreen() {
       toast.error('Please validate all actual plies before submitting.', 'Error');
       return;
     }
-    const cutSum   = barcodes.reduce((s, b) => s + b.actualPlies, 0);
-    const assigned = (normalJob?.assignedQty ?? endBitJob?.assignedQty) ?? 0;
+    const cutSum = barcodes.reduce((s, b) => s + b.actualPlies, 0);
+    const assigned = normalJob?.assignedQty ?? endBitJob?.assignedQty ?? 0;
     if (cutSum <= 0) {
       toast.error('Cut quantity cannot be zero.', 'Error');
       return;
@@ -291,10 +336,7 @@ export default function FollowerScreen() {
 
     if (normalJob) {
       // PUT /jobs/{jobId} — no body
-      submitCompleteJob(
-        { jobId: String(normalJob.jobId) },
-        { onSuccess, onError },
-      );
+      submitCompleteJob({ jobId: String(normalJob.jobId) }, { onSuccess, onError });
     } else if (endBitJob && deviceId && location) {
       // PUT /end-bits/jobs/{jobId} — body: { deviceId, location }
       submitCompleteEndBit(
@@ -308,7 +350,10 @@ export default function FollowerScreen() {
   if ((!isJobLoading && jobType === 'NONE') || showRefresh) {
     return (
       <RefreshScreen
-        onRefresh={() => { setShowRefresh(false); refetch(); }}
+        onRefresh={() => {
+          setShowRefresh(false);
+          refetch();
+        }}
         isLoading={isRefetching}
       />
     );
@@ -317,8 +362,8 @@ export default function FollowerScreen() {
   // ── Tab metadata ───────────────────────────────────────────────────────────
   const normalTabs = normalJob?.jobDetails ?? [];
   const endBitTabs = endBitJob?.jobDetails ?? [];
-  const tabCount   = jobType === 'NORMAL' ? normalTabs.length : endBitTabs.length;
-  const tabLabel   = (i: number) =>
+  const tabCount = jobType === 'NORMAL' ? normalTabs.length : endBitTabs.length;
+  const tabLabel = (i: number) =>
     jobType === 'NORMAL' ? (normalTabs[i]?.itemCode ?? '') : (endBitTabs[i]?.partName ?? '');
 
   // ── Active tab content ─────────────────────────────────────────────────────
@@ -338,6 +383,8 @@ export default function FollowerScreen() {
           onActualPliesChange={handleActualPliesChange}
           onValidate={handleNormalValidate}
           onDelete={handleNormalDelete}
+          onNoOfLaysChange={handleNoOfLaysChange}
+          onEndbitsChange={handleEndbitsChange}
           refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={onRefresh} />}
         />
       );
@@ -370,15 +417,16 @@ export default function FollowerScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-lightBlue" edges={['top']}>
-      <LoadingOverlay visible={isJobLoading || isCompleting || isScanning || isEndBitScanning || isEndBitCompleting} />
+      <LoadingOverlay
+        visible={
+          isJobLoading || isCompleting || isScanning || isEndBitScanning || isEndBitCompleting
+        }
+      />
 
       <CustomHeader
         title="FabCut"
         badge={jobType === 'END_BIT' ? 'END BIT' : undefined}
         onBack={() => setShowRefresh(true)}
-        overflowMenu={[
-          { label: 'Unregister', onPress: handleUnregister },
-        ]}
       />
 
       <View className="flex-1">
@@ -413,7 +461,9 @@ export default function FollowerScreen() {
                 onPress={() => setActiveTab(i)}
                 className={`px-4 py-3 border-b-2 ${activeTab === i ? 'border-white' : 'border-transparent'}`}
               >
-                <Text className={`text-sm font-medium ${activeTab === i ? 'text-white' : 'text-white/60'}`}>
+                <Text
+                  className={`text-sm font-medium ${activeTab === i ? 'text-white' : 'text-white/60'}`}
+                >
                   {tabLabel(i)}
                 </Text>
               </Pressable>

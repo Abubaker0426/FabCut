@@ -1,6 +1,8 @@
 import axios from 'axios';
 import { useAuthStore } from '@/store/authStore';
+
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
+
 console.log('[apiClient] Base URL →', BASE_URL);
 if (!BASE_URL) {
   throw new Error('EXPO_PUBLIC_API_URL is not configured. Check your .env file.');
@@ -23,7 +25,7 @@ apiClient.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 // On 401 — clear auth so app knows token is invalid
@@ -34,5 +36,5 @@ apiClient.interceptors.response.use(
       useAuthStore.getState().clearAuth();
     }
     return Promise.reject(error);
-  }
+  },
 );

@@ -54,3 +54,75 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+<!-- -------------------------------------------------------------------------------------------------------->
+when ever we add the new android or java code base need to re-build the app
+are else the changes will not refelect in the app  
+ npx expo prebuild --clean
+ npx expo run:android
+
+
+<!-- -------------------------------------------------------------------------------------------------------->
+
+<!-- for the wire less connection  -->
+# 1. Terminal 1: start Metro and leave it running
+npx expo start --dev-client
+-->example 
+1)npx expo start --dev-client
+
+this should be run in the separate ->terminal the dev clint should run to connect the app 
+# 2. Terminal 2: pair (only the first time, or if the phone forgot the laptop)
+adb pair <PAIR_IP>:<PAIR_PORT>
+2) -->example 
+ adb pair 192.168.5.50:46375
+
+# 3. Connect, using the IP & port on the main Wireless debugging page
+adb connect <IP>:<PORT>
+3)-->example 
+ adb connect 192.168.5.50:38315
+
+
+# 4. Check the device shows as "device"
+adb devices
+-->example same
+
+# 5. Route Metro to the phone, using the same <IP>:<PORT> from step 3
+adb -s <IP>:<PORT> reverse tcp:8081 tcp:8081
+5) -->example 
+   adb -s 192.168.5.54:34269 reverse tcp:8081 tcp:8081
+
+# 6. Restart the app, same <IP>:<PORT>
+adb -s <IP>:<PORT> shell am force-stop com.abubaker_siddiq.FabCut
+adb -s <IP>:<PORT> shell monkey -p com.abubaker_siddiq.FabCut -c android.intent.category.LAUNCHER 1
+-->example 
+adb -s 192.168.5.54:34269 shell am force-stop com.idflo.FabCut
+adb -s 192.168.5.54:34269 shell monkey -p com.idflo.FabCut -c android.intent.category.LAUNCHER 1
+
+
+
+
+<!-- /this was not working -->
+7) his auto-picks whatever device is connected, so you don't have to type the IP each time. 
+
+   adb devices
+$dev = (adb devices | Select-String "device$" | ForEach-Object { $_.Line.Split()[0] })
+adb -s $dev reverse tcp:8081 tcp:8081
+adb -s $dev shell am force-stop com.abubaker_siddiq.FabCut
+adb -s $dev shell monkey -p com.abubaker_siddiq.FabCut -c android.intent.category.LAUNCHER 1
+
+
+
+
+
+
+
+<!--  -->
+<!-- to clear  the pm  -->
+adb -s 192.168.5.54:33175  shell pm clear com.idflo.FabCut
+adb -s 192.168.5.54:33175  shell monkey -p com.idflo.FabCut -c android.intent.category.LAUNCHER 1
+
+
+
+npx prettier --write 
+npm run lint -- --fix
+npm run typecheck

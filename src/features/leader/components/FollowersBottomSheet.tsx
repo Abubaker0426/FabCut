@@ -1,22 +1,3 @@
-/**
- * FollowersBottomSheet
- * Mirrors: followers_jobs_bottom_sheet.xml + ViewPager behaviour in LeaderActivity
- *
- * Two pages — swipe left/right OR tap the tab pills:
- *  Page 0 — Followers grid  (3 columns)
- *  Page 1 — Assigned Jobs list
- *
- * Data is fetched here (not in the parent) because the sheet owns its lifecycle.
- * Mirrors Java: sheetBehavior.STATE_EXPANDED →
- *   mPresenter.fetchFollowers() + mPresenter.fetchAssignedJobs()
- *
- * Follower card tap  → onFollowerPress (parent navigates or assigns job)
- * Follower card X    → fetch job → confirm delete dialog → delete
- *   Java: onDelete(follower) → mPresenter.getFollowerJob(follower)
- *         → if jobId != null   → confirm → deleteJob(jobId)
- *         → if jobId == null   → getFollowerEndBitJob → confirm → deleteEndBitJob
- */
-
 import BottomSheet from '@gorhom/bottom-sheet';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
@@ -27,7 +8,7 @@ import AppSheetModal from '@/components/Common/AppSheetModal';
 import { LoadingOverlay } from '@/components/ui/LoadingOverlay';
 import { useAppStore } from '@/store/appStore';
 import { toast } from '@/lib/toast';
-import type { Follower, OcLay } from '@/types/leader';
+import type { Follower } from '@/types/leader';
 import type { FollowersBottomSheetProps } from '@/types/FollowersBottomSheet';
 
 import { FollowerCard } from './FollowerCard';
@@ -35,8 +16,7 @@ import { JobListHeader, JobListRow } from './JobListRow';
 import { useFetchFollowers } from '../hooks/useFetchFollowers';
 import { useFetchAssignedJobs } from '../hooks/useFetchAssignedJobs';
 import { useFetchFollowerJob } from '../hooks/useFetchFollowerJob';
-import { useDeleteFollowerJob } from '../hooks/useDeleteFollowerJob';
-import { useDeleteEndBitJob } from '../hooks/useDeleteFollowerJob';
+import { useDeleteFollowerJob, useDeleteEndBitJob } from '../hooks/useDeleteFollowerJob';
 
 const TAB_LABELS = ['Followers', 'Jobs Assigned'] as const;
 
@@ -47,11 +27,10 @@ export function FollowersBottomSheet({
   onFollowerPress,
   onJobPress,
 }: FollowersBottomSheetProps) {
-  const router     = useRouter();
-  const location   = useAppStore((s) => s.location);
-  const deviceId   = useAppStore((s) => s.deviceId);
-  const sheetRef   = useRef<BottomSheet>(null);
-  const pagerRef   = useRef<PagerView>(null);
+  const router = useRouter();
+  const location = useAppStore((s) => s.location);
+  const sheetRef = useRef<BottomSheet>(null);
+  const pagerRef = useRef<PagerView>(null);
   const [activePage, setActivePage] = useState(0);
 
   // ── Sheet open/close ────────────────────────────────────────────────────────
@@ -64,8 +43,6 @@ export function FollowersBottomSheet({
   }, [visible]);
 
   // ── Data hooks — enabled only when sheet is open ────────────────────────────
-  // Mirrors Java: sheetBehavior.STATE_EXPANDED →
-  //   mPresenter.fetchFollowers() + mPresenter.fetchAssignedJobs()
   const {
     data: followers,
     isLoading: isFollowersLoading,
@@ -79,19 +56,16 @@ export function FollowersBottomSheet({
   } = useFetchAssignedJobs(location, visible);
 
   // ── Delete flow hooks ───────────────────────────────────────────────────────
-  const { mutate: fetchFollowerJobMutate, isPending: isFetchingJob }    = useFetchFollowerJob();
+  const { mutate: fetchFollowerJobMutate, isPending: isFetchingJob } = useFetchFollowerJob();
   // Separate mutation instance for the tap-to-view flow
   const { mutate: fetchFollowerJobForView, isPending: isFetchingForView } = useFetchFollowerJob();
-  const { mutate: deleteNormalJob,         isPending: isDeletingNormal }  = useDeleteFollowerJob();
-  const { mutate: deleteEndBitJob,         isPending: isDeletingEndBit }  = useDeleteEndBitJob();
+  const { mutate: deleteNormalJob, isPending: isDeletingNormal } = useDeleteFollowerJob();
+  const { mutate: deleteEndBitJob, isPending: isDeletingEndBit } = useDeleteEndBitJob();
 
-  const isActionLoading = isFetchingJob || isFetchingForView || isDeletingNormal || isDeletingEndBit;
+  const isActionLoading =
+    isFetchingJob || isFetchingForView || isDeletingNormal || isDeletingEndBit;
 
   // ── Follower card tap — view job details ────────────────────────────────────
-  // Mirrors Java: onItemClickListener(follower) → mPresenter.fetchFollowerJob(follower)
-  //   → jobId != null   → openFollowerDetailActivity(response)       [NORMAL]
-  //   → jobId == null   → fetchFollowerEndBitJob → openFollowerDetailActivityForEndBit [END_BIT]
-  //   → endBitJobId == null → showAlertDialog("No job assigned")     [NONE]
   const handleFollowerTap = (follower: Follower) => {
     // In selection mode the parent handles the tap (assigning a job)
     if (selectionMode) {
@@ -113,7 +87,7 @@ export function FollowersBottomSheet({
           router.push({
             pathname: '/leader/follower-details',
             params: {
-              jobType:     result.type,
+              jobType: result.type,
               responseJson: JSON.stringify(result.data),
             },
           });
@@ -124,9 +98,7 @@ export function FollowersBottomSheet({
       },
     );
   };
-  // Mirrors Java: onDelete(follower) → mPresenter.getFollowerJob(follower)
-  //   → if jobId != null   → confirm dialog → deleteJob(jobId)
-  //   → if jobId == null   → getFollowerEndBitJob → confirm → deleteEndBitJob
+
   const handleDeletePress = (follower: Follower) => {
     if (!location) return;
 
@@ -165,7 +137,7 @@ export function FollowersBottomSheet({
                       },
                     );
                   } else {
-                    // Mirrors Java: deleteEndBitJob(response.getEndBitJobId(), follower.getDeviceId())
+                    //  deleteEndBitJob(response.getEndBitJobId(), follower.getDeviceId())
                     deleteEndBitJob(
                       {
                         endBitJobId: String(result.data.endBitJobId),
@@ -201,8 +173,8 @@ export function FollowersBottomSheet({
     setActivePage(index);
   };
 
-  const followerList  = followers   ?? [];
-  const jobList       = assignedJobs ?? [];
+  const followerList = followers ?? [];
+  const jobList = assignedJobs ?? [];
 
   return (
     <AppSheetModal
@@ -257,9 +229,7 @@ export function FollowersBottomSheet({
                   follower={item}
                   selectionMode={selectionMode}
                   onPress={() => handleFollowerTap(item)}
-                  onDelete={
-                    selectionMode ? undefined : () => handleDeletePress(item)
-                  }
+                  onDelete={selectionMode ? undefined : () => handleDeletePress(item)}
                 />
               </View>
             ))}
@@ -279,9 +249,9 @@ export function FollowersBottomSheet({
             {jobList.length === 0 && !isJobsLoading ? (
               <Text className="text-center text-gray-400 mt-10">No assigned jobs</Text>
             ) : (
-              jobList.map((item) => (
+              jobList.map((item, index) => (
                 <JobListRow
-                  key={item.jobId}
+                  key={`${item.jobId}-${index}`}
                   job={item}
                   onBundlePress={() => onJobPress?.(item)}
                 />
